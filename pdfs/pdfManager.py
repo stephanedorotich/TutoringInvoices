@@ -1,14 +1,15 @@
 # invoicePDFGenerator.py
+import sys
+sys.path.insert(0, '../')
 import os,glob,subprocess,shutil
-import invoiceManager as im
-import sessionManager as xm
-import studentManager as sm
+from invoices import invoiceManager as im
+from sessions import sessionManager as xm
+from students import studentManager as sm
 
 def generatePDF(invoice):
 	student = sm.findStudent(invoice.student)[0]
 	sessions = xm.findSessions(invoice.sessions)
 	filename = f'invoice{invoice.key}'
-
 
 	header = r'''\documentclass{invoice}
 	\def \tab {\hspace*{3ex}}
@@ -26,15 +27,15 @@ def generatePDF(invoice):
 	'''
 	header = fillHeader(header, student, invoice)
 
-	footer = r'''
-	Payable by: cash, cheque, or e-transfer
+	footer = r'''Payable by: cash, cheque, or e-transfer
 	\end{document}'''
 
 
-	main = '''\\begin{invoiceTable}
-	\\feetype{Tutoring Services}
-	SESSION\\end{invoiceTable}
-	'''
+	main = r'''\begin{invoiceTable}
+\feetype{Tutoring Services}
+GETMEOUT'''
+	#main = main.replace('''SESSION''', "fingers crossed")
+	#print(main)
 	main = fillMain(main, student, sessions)
 
 	content = header + main + footer
@@ -100,13 +101,12 @@ def fillMain(main,student,sessions):
 	body = ''''''
 	RATE = student.rate
 	for session in sessions:
-		DATE = sessions[0].datetime
-		DURATION = sessions[0].duration
-		line = f'\\\\hourrow{DATE}{DURATION}{RATE}'
-		print(line)
-		body+=line
-	print(main)
-	main = main.replace("SESSSION",body)
-	print(main)
-	return main
+		DATE = session.datetime
+		DURATION = session.duration
+		line = f'''\\hourrow{{{DATE}}}{{{DURATION}}}{{{RATE}}}
+'''
+		body = str(body + line)
+	body = str(body + r'''\end{invoiceTable}''')
+	hope = main.replace('''GETMEOUT''',body)
+	return hope
 

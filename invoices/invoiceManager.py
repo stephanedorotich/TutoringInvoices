@@ -1,9 +1,11 @@
 # invoiceManager.py
+import sys
+sys.path.insert(0, '../')
 import csv
 from datetime import date
-from invoices.invoices import Invoice
-import sessionManager as xm
-import pdfManager as pm
+from .invoices import Invoice
+from sessions import sessionManager as xm
+from pdfs import pdfManager as pm
 import helpers as h
 
 invoices = []
@@ -17,11 +19,11 @@ def loadInvoices(destination = 'invoices'):
 				invoice = Invoice(
 					key = h.importIntegerFromString(row[0]),
 					student = row[1],
-					datetime = importDateTimeFromString(row[2]),
-					total = importFloatFromString(row[3]),
-					sessions = importListFromString(row[4]),
-					paid = importBooleanFromString(row[5]),
-					printed = importBooleanFromString(row[6]))
+					date = h.importDateTimeFromString(row[2]),
+					total = h.importFloatFromString(row[3]),
+					sessions = h.importListFromString(row[4]),
+					paid = h.importBooleanFromString(row[5]),
+					printed = h.importBooleanFromString(row[6]))
 				invoices.append(invoice)
 	except FileNotFoundError:
 		print(f'File({filename}) does not exist')
@@ -34,7 +36,7 @@ def saveInvoices(destination = 'invoices'):
 			csv_writer.writerow(exportInvoice(invoice))
 
 def exportInvoice(i):
-	return [i.key, i.student, i.datetime, i.total, i.sessions, i.paid, i.printed]
+	return [i.key, i.student, i.date, i.total, i.sessions, i.paid, i.printed]
 
 def findInvoice(key):
 	try:
@@ -64,6 +66,7 @@ def createNewInvoiceForStudent(student, paid = False):
 			total += session.duration*student.rate
 			sessionKeys.append(session.key)
 			session.invoiced = True
+	
 	invoice = Invoice(key,student.name,dateOfInvoice,total,sessionKeys,paid)
 	invoices.append(invoice)
 	if not key in student.invoices:

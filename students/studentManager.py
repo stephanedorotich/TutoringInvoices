@@ -1,6 +1,8 @@
 # studentManager.py
+import sys
+sys.path.insert(0, '../')
 import csv
-from students.students import Student
+from .students import Student
 import helpers as h
 
 MINIMUM_SEARCH_QUERY_LENGTH = 3
