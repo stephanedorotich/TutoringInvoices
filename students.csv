@@ -1,3 +1,2 @@
-first_name,last_name,rate,address,studentEmail,studentPhoneNum,sessions,invoices,parent_name,parentPhone,parentEmail
-Stephane,Dorotich,80,"10 West Beynon Rise, Cochrane, AB",stephanedorotich@gmail.com,587-434-7693,[1,2,3],[1],Paul Dorotich,403-921-2721,pdorotich@shaw.ca
-Kailey,Sobocan,40,,,,403-701-6164,[],[],Jill Sobocan,,jjsobocan@gmail.com
+Stephane Dorotich,587-434-7693,stephanedorotich@gmail.com,Paul Dorotich,403-921-2721,pdorotich@shaw.ca,"10 West Beynon Rise, Cochrane, AB",80,[],"[0, 1]"
+Arienne Dusty,444-4444,yep@yep.yep,,8733,nope@nope.nope,,60,[],[]
