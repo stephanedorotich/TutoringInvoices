@@ -1,7 +1,9 @@
 # sessionManager.py
+import sys
+sys.path.insert(0, '../')
 import csv
 from datetime import datetime
-from sessions.sessions import Session
+from .sessions import Session
 import helpers as h
 
 sessions = []

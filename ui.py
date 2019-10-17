@@ -1,10 +1,9 @@
 # ui.py
 from datetime import datetime as dt
-import sessionManager as xm
-import studentManager as sm
-import invoiceManager as im
+import sessions.sessionManager as xm
+import students.studentManager as sm
+import invoices.invoiceManager as im
 from helpers import prettyPrint as pp
-import uihelpers as uih
 
 isTest = True
 
@@ -19,17 +18,15 @@ def run():
 	sessions = xm.sessions
 	students = sm.students
 	while running:
-		im.createNewInvoiceForStudent(sm.findStudent("Ste")[0])
-		im.generatePDF(0)
-		pp(im.invoices)
+		pp(students)
+#		im.createNewInvoiceForStudent(sm.findStudent("Ste")[0])
+#		im.generatePDF(0)
+		pp(invoices)
 		pp(sessions)
-		pp(sm.students)
 		running = False
-	#dostuff while not Q:
-	if not isTest:
-		im.saveInvoices()
-		xm.saveSessions()
-		sm.saveStudents()
+	im.saveInvoices()
+	xm.saveSessions()
+	sm.saveStudents()
 		
 
 run()
