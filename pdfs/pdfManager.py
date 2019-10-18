@@ -9,7 +9,11 @@ from students import studentManager as sm
 def generatePDF(invoice):
 	student = sm.findStudent(invoice.student)[0]
 	sessions = xm.findSessions(invoice.sessions)
-	filename = f'invoice{invoice.key}'
+	invoiceNumber = ''
+	for _ in range(4-len(str(invoice.key))):
+		invoiceNumber+='0'
+	invoiceNumber+=str(invoice.key)
+	filename = f'TutoringInvoice{invoiceNumber}-{student.name.split(" ")[0]}'
 
 	header = r'''\documentclass{invoice}
 	\def \tab {\hspace*{3ex}}
@@ -29,7 +33,6 @@ def generatePDF(invoice):
 
 	footer = r'''Payable by: cash, cheque, or e-transfer
 	\end{document}'''
-
 
 	main = r'''\begin{invoiceTable}
 \feetype{Tutoring Services}
