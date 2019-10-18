@@ -19,7 +19,7 @@ def loadInvoices(destination = 'invoices'):
 				invoice = Invoice(
 					key = h.importIntegerFromString(row[0]),
 					student = row[1],
-					date = h.importDateTimeFromString(row[2]),
+					date = h.importDateFromString(row[2]),
 					total = h.importFloatFromString(row[3]),
 					sessions = h.importListFromString(row[4]),
 					paid = h.importBooleanFromString(row[5]),
@@ -78,7 +78,7 @@ def deleteInvoice(key):
 	#TODO do stuff
 
 def generatePDF(key):
-	invoice = findInvoice(key)[0]
+	invoice = findInvoice(key)
 	if not invoice.printed:
 		pm.generatePDF(invoice)
 		invoice.printed = True

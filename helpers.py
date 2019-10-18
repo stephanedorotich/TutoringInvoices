@@ -1,5 +1,6 @@
 # helpers.py
 from datetime import datetime
+from datetime import date
 import dataclasses
 
 def findSingle(items,key):
@@ -14,7 +15,7 @@ def findSingle(items,key):
 		if not results:
 			raise ValueError(f'There are no {itemType}s with this key: "{key}"')
 		elif len(results) == 1:
-			return results
+			return results[0]
 		else:
 			raise ValueError(f'There are multiple {itemType}s that share this key: {key}')
 	else:
@@ -49,6 +50,11 @@ def importDateTimeFromString(val):
 		return datetime.fromisoformat(val)
 	except ValueError: raise ValueError(f'Value: {val} is not an ISO format Datetime')
 
+def importDateFromString(val):
+	try:
+		return date.fromisoformat(val)
+	except ValueError: raise ValueError(f'Value: {val} is not an ISO format Date')
+
 def importFloatFromString(val):
 	try:
 		return float(val)
@@ -68,16 +74,4 @@ def importListFromString(val):
 				vals.append(int(n))
 		return vals
 	except ValueError: raise ValueError(f'Value: {val} be parsed into a list of Integers')
-
-def prettyPrint(items):
-	if items:
-		output = ''
-		itemKeys = [*items[0].__annotations__]
-		for n in range(len(items)):
-			itemType = f'{type(items[0])}'.split(' ')[-1].split('.')[-1][:-2]
-			output+=f'\n{itemType} ({n+1}/{len(items)}):\n'
-			item = dataclasses.asdict(items[n])
-			for key in itemKeys:
-				output+=f'\t{key}: {item[key]}\n'
-		print(output)
 
