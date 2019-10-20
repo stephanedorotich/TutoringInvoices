@@ -5,6 +5,7 @@ import csv
 from .students import Student
 import helpers as h
 import uihelpers as uih
+import copy
 
 MINIMUM_SEARCH_QUERY_LENGTH = 3
 students = []
@@ -55,11 +56,6 @@ def findStudent(name):
 		else:
 			raise ValueError(f'There are multiple students that match the query: {name}')
 
-def addNewStudent(name,sPhoneNum='',sEmail='',pName='',pPhoneNum='',pEmail='',pAddress='',rate=50,sessions=[],invoices=[]):
-		student = Student(name,sPhoneNum,sEmail,pName,pPhoneNum,pEmail,pAddress,rate,sessions,invoices)
-		students.append(student)
-		updateMinimumSearchQueryLength()
-
 def newStudentUI():
 	fields = [*Student.__annotations__][:-2]
 	student = Student()
@@ -67,21 +63,67 @@ def newStudentUI():
 		while True:
 			userinput = uih.listener(input(f'Please enter their {f}: '))
 			if uih.doubleCheck(userinput):
-				Student.changeAttribute(student,f,userinput)
-				break
+				try:
+					changeAttribute(student,f,userinput)
+					break
+				except ValueError as e:
+					print(e)
 			else:
-				continue		
-	students.append(student)
+				continue
 	print('''
 ******************************
 STUDENT GENERATED SUCCESSFULLY
 ******************************''')
-	print(uih.asString(student))
+	uih.printItem(student)
 	print('******************************\n******************************\n')
+	x = uih.getChoice('Would you like to save this Student?',uih.yn)
+	if x == 'y' or x == '':
+		students.append(student)
+		print("Student saved...\n")
+		updateMinimumSearchQueryLength()
 
-###WATCH OUT FOR THIS ONE NEEDS EXTERNAL HELP TO MAKE WORK
-def addNewSessionKey(name):
-	student.sessions.append(name)
+def editStudentUI():
+	fields = [*Student.__annotations__][:-2]
+	## so user cannot edit 'sessions' or 'invoices' (last 2 fields for a Student)
+	while True:
+		toSearch = uih.listener(input(f'Which Student would you like to edit? '))
+		try:
+			student = findStudent(toSearch)
+		except ValueError as e:
+			print(e)
+			continue
+		original = copy.deepcopy(student)
+		if uih.doubleCheck(student.name):
+			uih.printItem(student)
+			break
+	for f in fields:
+		while True:
+			userinput = uih.listener(input(f'Please enter their {f}: '))
+			if uih.doubleCheck(userinput):
+				if userinput == 'delete':
+					try:
+						changeAttribute(student,f,'')
+						break
+					except ValueError as e:
+						print(e)
+				elif not userinput == '':
+					try:
+						changeAttribute(student,f,userinput)
+						break
+					except ValueError as e:
+						print(e)
+				break
+			else:
+				continue
+	print('''
+*******************************
+  STUDENT EDITED SUCCESSFULLY
+*******************************''')
+	uih.printItem(student)
+	print('*******************************\n*******************************\n')
+
+def addSessionKey(student,key):
+	student.sessions.append(key)
 
 def updateStudentName(student,name):
 	student.name=name
@@ -118,8 +160,28 @@ def updateMinimumSearchQueryLength():
 			except ValueError as e:
 				print(e)
 				MINIMUM_SEARCH_QUERY_LENGTH+=1
-				print(f'Minimum search query length is: {MINIMUM_SEARCH_QUERY_LENGTH}')
 				updateMinimumSearchQueryLength()
 				break
 		if initial < MINIMUM_SEARCH_QUERY_LENGTH:
+			print(f'New minimum search query length is: {MINIMUM_SEARCH_QUERY_LENGTH}')
 			break
+
+def changeAttribute(self,attributeName,newValue):
+	switch = [*Student.__annotations__]
+	if attributeName == switch[0]:
+		self.name = newValue
+	elif attributeName == switch[1]:
+		self.sPhoneNum = newValue
+	elif attributeName == switch[2]:
+		self.sEmail = newValue
+	elif attributeName == switch[3]:
+		self.pName = newValue
+	elif attributeName == switch[4]:
+		self.pPhoneNum = newValue
+	elif attributeName == switch[5]:
+		self.pEmail = newValue
+	elif attributeName == switch[6]:
+		self.pAddress = newValue
+	elif attributeName == switch[7]:
+		if not newValue == '':
+			self.rate = h.importIntegerFromString(newValue)

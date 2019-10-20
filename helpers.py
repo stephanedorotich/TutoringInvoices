@@ -3,6 +3,9 @@ from datetime import datetime
 from datetime import date
 import dataclasses
 
+sessionKey = 1
+invoiceKey = 0
+
 def findSingle(items,key):
 	if items:
 		results = []
@@ -43,27 +46,27 @@ def importBooleanFromString(val):
 			return True
 		elif val == "False":
 			return False
-	except ValueError: raise VaueError(f'Value: {val} is not a Boolean')
+	except ValueError: raise VaueError(f'Value: \'{val}\' is not a Boolean')
 
 def importDateTimeFromString(val):
 	try:
 		return datetime.fromisoformat(val)
-	except ValueError: raise ValueError(f'Value: {val} is not an ISO format Datetime')
+	except ValueError: raise ValueError(f'Value: \'{val}\' is not an ISO format Datetime')
 
 def importDateFromString(val):
 	try:
 		return date.fromisoformat(val)
-	except ValueError: raise ValueError(f'Value: {val} is not an ISO format Date')
+	except ValueError: raise ValueError(f'Value: \'{val}\' is not an ISO format Date')
 
 def importFloatFromString(val):
 	try:
 		return float(val)
-	except ValueError: raise ValueError(f'Value: {val} is not a Float')
+	except ValueError: raise ValueError(f'Value: \'{val}\' is not a Float')
 
 def importIntegerFromString(val):
 	try:
 		return int(val)
-	except ValueError: raise ValueError(f'Value: {val} is not an Integer')
+	except ValueError: raise ValueError(f'Value: \'{val}\' is not an Integer')
 
 def importListFromString(val):
 	try:

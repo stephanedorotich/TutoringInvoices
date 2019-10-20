@@ -2,11 +2,14 @@
 import sys
 sys.path.insert(0, '../')
 import csv
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from .sessions import Session
+from students import studentManager as sm
 import helpers as h
+import uihelpers as uih
 
 sessions = []
+sessionKey = 0
 
 def loadSessions(destination = 'sessions'):
 	filename = f'{destination}.csv'
@@ -22,6 +25,8 @@ def loadSessions(destination = 'sessions'):
 					subject = row[4],
 					invoiced = h.importBooleanFromString(row[5]))
 				sessions.append(session)
+			global sessionKey
+			sessionKey = sessions[-1].key
 	except FileNotFoundError:
 		print(f'File({filename}) does not exist')
 
@@ -49,14 +54,59 @@ def findSessions(keys):
 	except ValueError as e:
 		print(e)
 
-def addNewSession(student,datetime,duration):
-	key = 0
-	if not sessions:
-		key = 0
-	else:
-		key = (sessions[-1].key) + 1
-	session = Session(key,student,datetime,duration)
-	sessions.append(session)
-	return key
+def newSessionUI():
+	fields = [*Session.__annotations__][1:-1]
+	session = newSession()
+	done = False
+	for f in fields:
+		while not done:
+			userinput = uih.listener(input(f'Please enter the {f}: '))
+			if f == 'student':
+				try:
+					student = sm.findStudent(userinput)
+					userinput = student.name
+				except ValueError as e:
+					print(e)
+					continue
+			if f == 'datetime':
+				if 'today' in userinput:
+					userinput = userinput.replace('today',str(date.today()))
+				if 'yesterday' in userinput:
+					userinput = userinput.replace('yesterday',date.strftime(date.today() - timedelta(1), '%Y-%m-%d'))
+			if uih.doubleCheck(userinput):
+				try:
+					changeAttribute(session,f,userinput)
+					break
+				except ValueError as e:
+					print(e)
+			else:
+				continue
+	print('''
+******************************
+SESSION GENERATED SUCCESSFULLY
+******************************''')
+	uih.printItem(session)
+	print('******************************\n******************************\n')
+	x = uih.getChoice('Would you like to save this Session?',uih.yn)
+	if x == 'y' or x == '':
+		sessions.append(session)
+		sm.addSessionKey(student,session.key)
+		print("Session saved...\n")
+
+def changeAttribute(self,attributeName,newValue):
+	switch = [*Session.__annotations__]
+	if attributeName == switch[1]:
+		self.student = newValue
+	elif attributeName == switch[2]:
+		self.datetime = h.importDateTimeFromString(newValue)
+	elif attributeName == switch[3]:
+		self.duration = h.importFloatFromString(newValue)
+	elif attributeName == switch[4]:
+		self.subject = newValue.upper()
+
+def newSession():
+	global sessionKey
+	sessionKey+=1
+	return Session(sessionKey)
 
 
