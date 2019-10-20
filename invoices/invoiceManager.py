@@ -9,6 +9,7 @@ from pdfs import pdfManager as pm
 import helpers as h
 
 invoices = []
+invoiceKey = 0
 
 def loadInvoices(destination = 'invoices'):
 	filename = f'{destination}.csv'
@@ -25,6 +26,8 @@ def loadInvoices(destination = 'invoices'):
 					paid = h.importBooleanFromString(row[5]),
 					printed = h.importBooleanFromString(row[6]))
 				invoices.append(invoice)
+			global invoiceKey
+			invoiceKey = invoices[-1].key
 	except FileNotFoundError:
 		print(f'File({filename}) does not exist')
 
@@ -53,10 +56,8 @@ def findInvoices(keys):
 		print(e)
 
 def createNewInvoiceForStudent(student, paid = False):
-	if not invoices:
-		key = 0
-	else:
-		key = (invoices[-1].key) + 1
+	global invoiceKey
+	invoiceKey+=1
 	dateOfInvoice = date.today()
 	total = 0
 	sessionKeys = []
@@ -66,12 +67,14 @@ def createNewInvoiceForStudent(student, paid = False):
 			total += session.duration*student.rate
 			sessionKeys.append(session.key)
 			session.invoiced = True
-	
-	invoice = Invoice(key,student.name,dateOfInvoice,total,sessionKeys,paid)
+	if not sessionKeys:
+		print("No new sessions to invoice for this Student\n")
+		return
+	invoice = Invoice(invoiceKey,student.name,dateOfInvoice,total,sessionKeys,paid)
 	invoices.append(invoice)
-	if not key in student.invoices:
-		student.invoices.append(key)
-	return key
+	if not invoiceKey in student.invoices:
+		student.invoices.append(invoiceKey)
+	return invoiceKey
 
 def deleteInvoice(key):
 	invoice = findInvoice(key)[0]

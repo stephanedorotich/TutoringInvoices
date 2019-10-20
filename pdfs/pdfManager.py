@@ -7,7 +7,7 @@ from sessions import sessionManager as xm
 from students import studentManager as sm
 
 def generatePDF(invoice):
-	student = sm.findStudent(invoice.student)[0]
+	student = sm.findStudent(invoice.student)
 	sessions = xm.findSessions(invoice.sessions)
 	invoiceNumber = ''
 	for _ in range(4-len(str(invoice.key))):
@@ -23,8 +23,8 @@ def generatePDF(invoice):
 	\bigskip\break
 	\hrule
 
-	10 West Beynon Rise \hfill 587-434-7693 \\
-	Cochrane, AB \hfill stephanedorotich@gmail.com \\
+	Stéphane Dorotich \hfill 587-434-7693 \\
+	10 West Beynon Rise, Cochrane, AB \hfill stephanedorotich@gmail.com \\
 	\hrule
 	{\bf Invoice To:} \hfill {\bf Date:} INVOICEDATE \\
 	NAME PHONENUM EMAIL ADDRESS \\
