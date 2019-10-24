@@ -1,4 +1,5 @@
 # invoicePDFGenerator.py
+import os
 import sys
 sys.path.insert(0, '../')
 import os,glob,subprocess,shutil
@@ -6,7 +7,21 @@ from invoices import invoiceManager as im
 from sessions import sessionManager as xm
 from students import studentManager as sm
 
-def generatePDF(invoice):
+def getFileName(invNum, studentName):
+	return f'TutoringInvoice{invNum}-{studentName.split(" ")[0]}'
+
+def getInvNum(invKey):
+	invNum = ''
+	for _ in range(4-len(str(invKey))):
+		invNum+='0'
+	invNum+=str(invKey)
+	return invNum
+
+def openPDF(invoice):
+	filename = getFileName(getInvNum(invoice.key),invoice.student)
+	os.system(f'open pdfs/{filename}.pdf')
+
+def printPDF(invoice):
 	student = sm.findStudent(invoice.student)
 	sessions = xm.findSessions(invoice.sessions)
 	invoiceNumber = ''
@@ -16,30 +31,26 @@ def generatePDF(invoice):
 	filename = f'TutoringInvoice{invoiceNumber}-{student.name.split(" ")[0]}'
 
 	header = r'''\documentclass{invoice}
-	\def \tab {\hspace*{3ex}}
-	\begin {document}
+\renewcommand{\familydefault}{\sfdefault}
+\def \tab {\hspace*{3ex}}
+\begin {document}
+\begin{center}
+{\huge\sc Stéphane Dorotich}\\
+{\Large\sc Tutoring}
+\end{center}
+\bigskip
+\hrule
+Stéphane Dorotich \hfill 587-434-7693 \\
+10 West Beynon Rise, Cochrane, AB \hfill stephanedorotich@gmail.com \\
 
-	\hfil{\Huge\bf SD Tutoring}\hfil
-	\bigskip\break
-	\hrule
-
-	Stéphane Dorotich \hfill 587-434-7693 \\
-	10 West Beynon Rise, Cochrane, AB \hfill stephanedorotich@gmail.com \\
-	\hrule
-	{\bf Invoice To:} \hfill {\bf Date:} INVOICEDATE \\
-	NAME PHONENUM EMAIL ADDRESS \\
-	'''
+{\large \sc Invoice To:} \hfill {\sc Date:} INVOICEDATE \\
+NAME PHONENUM EMAIL ADDRESS'''
 	header = fillHeader(header, student, invoice)
 
 	footer = r'''Payable by: cash, cheque, or e-transfer
-	\end{document}'''
+\end{document}'''
 
-	main = r'''\begin{invoiceTable}
-\feetype{Tutoring Services}
-GETMEOUT'''
-	#main = main.replace('''SESSION''', "fingers crossed")
-	#print(main)
-	main = fillMain(main, student, sessions)
+	main = fillMain(student, sessions)
 
 	content = header + main + footer
 
@@ -61,20 +72,9 @@ def fillHeader(header,student,invoice):
 	else:
 		NAME = student.pName
 
-	if len(student.pPhoneNum) == 0:
-		PHONENUM = student.sPhoneNum
-	else:
-		PHONENUM = student.pPhoneNum
-
-	if len(student.pEmail) == 0:
-		EMAIL = student.sEmail
-	else:
-		EMAIL = student.pEmail
-
-	if len(student.pAddress) == 0:
-		ADDRESS = ''
-	else:
-		ADDRESS = student.pAddress
+	PHONENUM = student.pPhoneNum
+	EMAIL = student.pEmail
+	ADDRESS = student.pAddress
 
 	temp = r'''\tab NAME \\'''
 	header = header.replace("NAME",temp.replace("NAME",NAME))
@@ -100,16 +100,23 @@ def fillHeader(header,student,invoice):
 	header = header.replace("INVOICEDATE",str(invoice.date))
 	return header
 
-def fillMain(main,student,sessions):
+def fillMain(student,sessions):
+	main = r'''\\\\
+{\sc Tutoring - STUDENTNAME}
+\begin{invoiceTable}
+\feetype{Tutoring Services}                          
+SESSIONS
+\end{invoiceTable}'''
+	main = main.replace('''STUDENTNAME''',f'{student.name}')
 	body = ''''''
-	RATE = student.rate
 	for session in sessions:
+		if session.paid:
+			RATE = 0
+		else:
+			RATE = student.rate
 		DATE = session.datetime
 		DURATION = session.duration
 		line = f'''\\hourrow{{{DATE}}}{{{DURATION}}}{{{RATE}}}
 '''
 		body = str(body + line)
-	body = str(body + r'''\end{invoiceTable}''')
-	hope = main.replace('''GETMEOUT''',body)
-	return hope
-
+	return main.replace('''SESSIONS''',body)

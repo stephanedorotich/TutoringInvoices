@@ -4,133 +4,113 @@ import sessions.sessionManager as xm
 import students.studentManager as sm
 import invoices.invoiceManager as im
 import uihelpers as uih
-# Basic functionality:
-#
-#	Must be able to add a new student - DONE
-# 		Must prompt user to provide responses for each of the field values.
-#
-#	Must be able to add new invoice - DONE
-#		Must allow the user to search for a student
-#		Must prompt user to provide responses for each of the field values.
-#	
 #	Must be able ot generate new invoices. - TODO
 #		Functionality uncertain. Perhaps iterates through all students and prints invoices,
 #		maybe automatically does so at the end of the month?
 
 
-isTest = False
-
-# listener:
-# listends for COMMAND keys
-# every userinput is is listened to.
-# If userinput = 'Q', initiates exit or exitTest (depending on whether isTest = True).
-# If userinput = 'TEST', sets var isTest to True, then returns input() to enable user
-# to input new information with no response from the calling function.
-# If not userinput = 'Q' or 'TEST' returns userinput to calling function.
-# >> case sensitive
-def listener(userinput):
-	global isTest
-	if userinput == 'Q':
-		if isTest:
-			exitTest()
-		else:
-			exit()
-	elif userinput == 'TEST':
-		isTest = True
-		return listener(input())
-	else:
-		return userinput
-
+# MENUS
 def mainMenu():
-	print("MAIN MENU:\t    (Q: quit)")
+	print("MAIN MENU:\t\t(Q: quit)")
+	query = '''\tstudents
+\tsessions
+\tinvoices'''
+	options = ['students','sessions','invoices', '1', '2', '3']
+	choice = uih.getChoice(query,options)
+	if choice == options[0] or choice == options[3]:
+		studentMenu()
+	if choice == options[1] or choice == options[4]:
+		sessionMenu()
+	if choice == options[2] or choice == options[5]:
+		invoiceMenu()
+
+def studentMenu():
+	print("\nSTUDENT MENU:\t\t(Q: quit)")
 	query = '''Would you like to:
 \t1. Add a new student
-\t2. Add a new session
-\t3. Edit a student'''
-	options = ['1','2','3']
+\t2. Edit a student
+\t3. View a student
+\t4. View all students'''
+	options = ['1','2','3','4']
 	choice = uih.getChoice(query,options)
 	if choice == options[0]:
-		newStudent()
+		sm.newStudentUI()
 	if choice == options[1]:
-		newSession()
+		sm.editStudentUI()
 	if choice == options[2]:
-		editStudent()
-
-def newStudent():
-	sm.newStudentUI()
+		sm.viewStudentUI()
+	if choice == options[3]:
+		uih.printItems(sm.students)
 	mainMenu()
 
-def newSession():
-	xm.newSessionUI()
+def sessionMenu():
+	name = "SESSION MENU"
+	options = ['Add new session(s)','View all sessions']
+
+	query = f'\n{name}:\t\t(Q: quit)\nWould you like to:'
+	listener = []
+
+	for n in range(len(options)):
+		query+=f'\n\t{n+1}. {options[n]}'
+		listener.append(str(n+1))
+
+	choice = uih.getChoice(query,listener)
+
+	if choice == listener[0]:
+		xm.newSessionUI()
+	if choice == listener[1]:
+		uih.printItems(xm.sessions)
 	mainMenu()
 
-def editStudent():
-	sm.editStudentUI()
+def invoiceMenu():
+	print("\nINVOICE MENU:\t\t(Q: quit)")
+	query = '''Would you like to:
+\t1. View most recent invoice by student
+\t2. View all invoices
+\t3. Create a monthly invoice by student
+\t4. Print most recent invoice for'''
+	options = ['1','2','3','4']
+	choice = uih.getChoice(query,options)
+	if choice == options[0]:
+		try:
+			im.openRecentInvoiceUI()
+		except ValueError as e:
+			print(e)
+	if choice == options[1]:
+		uih.printItems(im.invoices)
+	if choice == options[2]:
+		try:
+			im.newInvoiceUI()
+		except ValueError as e:
+			print(e)
+	if choice == options[3]:
+		try:
+			im.printRecentInvoice()
+		except ValueError as e:
+			print(e)
 	mainMenu()
-
-# exit:
-# called when user inputs Q
-# saves all invoices, students, and sessions to their csv files
-def exit():
-	im.saveInvoices()
-	sm.saveStudents()
-	xm.saveSessions()
-	sys.exit()
-
-# exitTest:
-# called when user inputs Q and when var isTest = True (which occurs when user inputs TEST)
-# does not save invoices, students, or sessions
-# performs various programmer defined actions.
-# TODO: enable user control do perform various operations
-def exitTest():
-#	im.createNewInvoiceForStudent(sm.findStudent("Ste"))
-	uih.printItem(sm.findStudent("Ste"))
-	im.saveInvoices()
-	sys.exit()
 
 def run():
 	im.loadInvoices()
 	xm.loadSessions()
 	sm.loadStudents()
-	#im.generatePDF(0)
-	mainMenu()
+	isRunning = True
+	while isRunning:
+		try:
+			mainMenu()
+		except StopIteration as e:
+			print(e)
+			continue
 
 run()
-#LISTENER:
-#	--> Q to Quit
-#	--> TEST:
-#			Changes isTest to True, runs alternate Exit code (with options you can select) when
-#			command Q is heard
-
-
-
-
-
-
 
 #-->Sessions
-#	DONE-->AddNew: 	Need to choose student
-#				-->Recent
-#				-->Search
-#				Need to specify datetime
-#				-->today
-#				-->custom
-#				Need to specifiy duration (as float)
 #	-->Delete
 #		-->Recent?
-#		-->Search
-#	-->View
-#		-->Recent
-#		-->Recents?(such as 5 most recent)
 #		-->Search
 #	-->Edit
 #		-->[*Sessions.__annotations__]
 #-->Students
-#	DONE-->AddNew
 #	-->Delete
 #		-->Recent?
 #		-->Search
-#	-->View
-#		-->Recent
-#		-->Search
-#	DONE-->Edit

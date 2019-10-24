@@ -28,6 +28,7 @@ def loadStudents(destination = 'students'):
 					invoices = h.importListFromString(row[8]),
 					sessions = h.importListFromString(row[9]))
 				students.append(student)
+			updateMinimumSearchQueryLength()
 	except FileNotFoundError:
 		print(f'File({filename}) does not exist')
 
@@ -56,6 +57,7 @@ def findStudent(name):
 		else:
 			raise ValueError(f'There are multiple students that match the query: {name}')
 
+# >> gonna have to move to a new file
 def newStudentUI():
 	fields = [*Student.__annotations__][:-2]
 	student = Student()
@@ -82,24 +84,18 @@ STUDENT GENERATED SUCCESSFULLY
 		print("Student saved...\n")
 		updateMinimumSearchQueryLength()
 
+# >> gonna have to move to a new file
 def editStudentUI():
 	fields = [*Student.__annotations__][:-2]
 	## so user cannot edit 'sessions' or 'invoices' (last 2 fields for a Student)
-	while True:
-		toSearch = uih.listener(input(f'Which Student would you like to edit? '))
-		try:
-			student = findStudent(toSearch)
-		except ValueError as e:
-			print(e)
-			continue
-		original = copy.deepcopy(student)
-		if uih.doubleCheck(student.name):
-			uih.printItem(student)
-			break
+	student = pickStudent("to edit")
+	edits = []
 	for f in fields:
 		while True:
 			userinput = uih.listener(input(f'Please enter their {f}: '))
 			if uih.doubleCheck(userinput):
+				#### TODO WARNING! delete's field without double checking
+				#### should get moved below.
 				if userinput == 'delete':
 					try:
 						changeAttribute(student,f,'')
@@ -108,46 +104,50 @@ def editStudentUI():
 						print(e)
 				elif not userinput == '':
 					try:
-						changeAttribute(student,f,userinput)
+						edits.append((f,userinput))
 						break
 					except ValueError as e:
 						print(e)
 				break
 			else:
 				continue
-	print('''
+#### TODO	
+#### CAN DO SOME WORK HERE. MAKE THE PRINT STATEMENT MORE
+#### INFORMATIVE
+	print("EDITS:")
+	for edit in edits:
+		print(f'\t{edit[0]}: {edit[1]}')
+	choice = uih.getChoice('Would you like to save these edits?',uih.yn)
+	if choice == 'y' or choice == '':
+		for edit in edits:
+			changeAttribute(student,edit[0],edit[1])
+		print('''
 *******************************
   STUDENT EDITED SUCCESSFULLY
 *******************************''')
+		uih.printItem(student)
+		print('*******************************\n*******************************\n')
+	
+
+# >> gonna have to move to a new file
+def viewStudentUI():
+	student = pickStudent("to view")
 	uih.printItem(student)
-	print('*******************************\n*******************************\n')
+
+# >> gonna have to move to a new file
+def pickStudent(op):
+	while True:
+		userInput = uih.listener(input(f'Which Student would you like {op}? '))
+		try:
+			student = findStudent(userInput)
+		except ValueError as e:
+			print(e)
+			continue
+		if uih.doubleCheck(student.name):
+			return student
 
 def addSessionKey(student,key):
 	student.sessions.append(key)
-
-def updateStudentName(student,name):
-	student.name=name
-
-def updateStudentPhoneNum(student,sPhoneNum):
-	student.sPhoneNum=sPhoneNum
-
-def updateStudentEmail(student,sEmail):
-	student.sEmail=sEmail
-
-def updateParentName(student,pName):
-	student.pName=pName
-
-def updateParentPhoneNum(student,pPhoneNum):
-	student.pPhoneNum=pPhoneNum
-
-def updateParentEmail(student,pEmail):
-	student.pEmail=pEmail
-
-def updateParentAddress(student,pAddress):
-	student.pAddress=pAddress
-
-def updateRate(student,rate):
-	student.rate=rate
 
 def updateMinimumSearchQueryLength():
 	global MINIMUM_SEARCH_QUERY_LENGTH
@@ -184,4 +184,7 @@ def changeAttribute(self,attributeName,newValue):
 		self.pAddress = newValue
 	elif attributeName == switch[7]:
 		if not newValue == '':
-			self.rate = h.importIntegerFromString(newValue)
+			try:
+				self.rate = h.importIntegerFromString(newValue)
+			except ValueError as e:
+				print('Rate could not be edited because',e)

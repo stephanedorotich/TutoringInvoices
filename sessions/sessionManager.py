@@ -8,8 +8,8 @@ from students import studentManager as sm
 import helpers as h
 import uihelpers as uih
 
-sessions = []
 sessionKey = 0
+sessions = []
 
 def loadSessions(destination = 'sessions'):
 	filename = f'{destination}.csv'
@@ -23,10 +23,12 @@ def loadSessions(destination = 'sessions'):
 					datetime = h.importDateTimeFromString(row[2]),
 					duration = h.importFloatFromString(row[3]),
 					subject = row[4],
-					invoiced = h.importBooleanFromString(row[5]))
+					paid = h.importBooleanFromString(row[5]),
+					paymentType = row[6])
 				sessions.append(session)
 			global sessionKey
-			sessionKey = sessions[-1].key
+			if not len(sessions) == 0:
+				sessionKey = sessions[-1].key
 	except FileNotFoundError:
 		print(f'File({filename}) does not exist')
 
@@ -38,24 +40,22 @@ def saveSessions(destination = 'sessions'):
 			csv_writer.writerow(exportSession(session))
 
 def exportSession(s):
-	return [s.key, s.student, s.datetime, s.duration, s.subject, s.invoiced]
+	return [s.key, s.student, s.datetime, s.duration, s.subject, s.paid, s.paymentType]
 
 def findSession(key):
 	try:
-		results = h.findSingle(sessions,key)
-		return results
+		result = h.findSingle(sessions,key)
+		return result
 	except ValueError as e:
 		print(e)
 
 def findSessions(keys):
-	try:
-		results = h.findMultiple(sessions,keys)
-		return results
-	except ValueError as e:
-		print(e)
+	results = h.findMultiple(sessions,keys)
+	return results
 
+# >> gonna have to move to a new file
 def newSessionUI():
-	fields = [*Session.__annotations__][1:-1]
+	fields = [*Session.__annotations__][1:]
 	session = newSession()
 	done = False
 	for f in fields:
@@ -73,25 +73,34 @@ def newSessionUI():
 					userinput = userinput.replace('today',str(date.today()))
 				if 'yesterday' in userinput:
 					userinput = userinput.replace('yesterday',date.strftime(date.today() - timedelta(1), '%Y-%m-%d'))
+			if f == 'paid':
+				if userinput == '' or userinput == 'y':
+					userinput = 'True'
+				if userinput == 'n':
+					userinput = 'False'
 			if uih.doubleCheck(userinput):
+				if f == 'duration' and userinput == '':
+					break
 				try:
 					changeAttribute(session,f,userinput)
 					break
 				except ValueError as e:
 					print(e)
-			else:
-				continue
+					continue
 	print('''
 ******************************
 SESSION GENERATED SUCCESSFULLY
 ******************************''')
 	uih.printItem(session)
 	print('******************************\n******************************\n')
-	x = uih.getChoice('Would you like to save this Session?',uih.yn)
-	if x == 'y' or x == '':
+	choice = uih.getChoice('Would you like to save this Session?',uih.yn)
+	if choice == 'y' or choice == '':
 		sessions.append(session)
 		sm.addSessionKey(student,session.key)
-		print("Session saved...\n")
+		print("Session saved...")
+	choice = uih.getChoice('Would you like to input another Session?', uih.yn)
+	if choice == 'y' or choice == '':
+		newSessionUI()
 
 def changeAttribute(self,attributeName,newValue):
 	switch = [*Session.__annotations__]
@@ -103,6 +112,10 @@ def changeAttribute(self,attributeName,newValue):
 		self.duration = h.importFloatFromString(newValue)
 	elif attributeName == switch[4]:
 		self.subject = newValue.upper()
+	elif attributeName == switch[5]:
+		self.paid = h.importBooleanFromString(newValue)
+	elif attributeName == switch[6]:
+		self.paymentType = newValue
 
 def newSession():
 	global sessionKey

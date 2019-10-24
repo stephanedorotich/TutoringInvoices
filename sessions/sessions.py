@@ -7,7 +7,8 @@ import helpers as h
 class Session:
 	key: int
 	student: str = ''
-	datetime: datetime = datetime.today()
+	datetime: datetime = None
 	duration: float = 1.0
 	subject: str = ''
-	invoiced: bool = False
+	paid: bool = False
+	paymentType: str = ''
