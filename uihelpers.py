@@ -7,16 +7,14 @@ import invoices.invoiceManager as im
 
 ###########################################################################
 # Primary purpose is to validate userinput and listen for COMMAND keys
-# Also provide a generic print for dataclass items
+# Also to provide a prettyPrint fn for dataclass items
 # 
 # note: Ideally I want the quit & quitTest functions to be found in ui
 # but importing ui from here seems to break the code. TODO ?
 ###########################################################################
 
-
-
-yn = ['y', 'n', '']
 isTest = False
+yn = ['y', 'n', '']
 
 # listener:
 # listends for COMMAND keys
@@ -36,17 +34,19 @@ def listener(userinput):
 	elif userinput == 'TEST':
 		isTest = True
 		return listener(input())
+	elif userinput == 'MAIN':
+		raise StopIteration
 	else:
 		return userinput
 
 # quit:
 # called when user inputs Q
-# saves all invoices, students, and sessions to their csv files
+# saves all invoices, students, and sessions to their csv files. Exits the program.
 def quit():
 	im.saveInvoices()
 	sm.saveStudents()
 	xm.saveSessions()
-	sys.quit()
+	sys.exit()
 
 # quitTest:
 # called when user inputs Q and when var isTest = True (which occurs when user inputs TEST)
@@ -57,10 +57,7 @@ def quitTest():
 #	printItems(im.invoices)
 #	printItems(xm.sessions)
 #	printItems(sm.students)
-	printItem(sm.findStudent('Stephane'))
-#	im.createNewInvoiceForStudent(sm.findStudent("Ste"))
-#	im.createNewInvoiceForStudent(sm.findStudent("iba"))
-#	im.generateInvoice(0)
+#	im.printPDF(0)
 	sys.exit()
 
 # doubleCheck
@@ -69,6 +66,7 @@ def quitTest():
 # Will continue if userinput =  enter or y
 # Will ask the previous query if userinput = n
 def doubleCheck(userinput):
+	# if userinput was 'enter' then skips this one and assumes no input
 	if userinput == '':
 		return True
 	query = f'Is \"{userinput}\" correct?'
@@ -97,9 +95,15 @@ def getChoice(query,choices):
 # if not, raises ValueError
 # note: if last char in choices is '', appends the word 'enter' to the
 # string that gets displayed to the user.
+### TODO this has changed. it can now return choice as int
 def validateChoice(userinput,choices):
-	if userinput.lower() in choices:
-		return userinput.lower()
+	for choice in choices:
+		try:
+			if userinput.lower() in choice:
+				return choice.lower()
+		except TypeError:
+			if int(userinput) == choice:
+				return choice
 	else:
 		options = ", ".join(choices)
 		if choices[-1]=='':
@@ -110,18 +114,19 @@ def validateChoice(userinput,choices):
 # Takes a list of Students, Sessions, or Invoices (any kind of dataclass)
 # and prints them out individually
 def printItems(items):
-	output = ''
-	itemKeys = [*items[0].__annotations__]
-	totalItems = len(items)
-	for n in range(totalItems):
-		printItem(items[n], n+1, totalItems)
+	if not len(items) == 0:
+		output = ''
+		itemKeys = [*items[0].__annotations__]
+		totalItems = len(items)
+		for n in range(totalItems):
+			printItem(items[n], n+1, totalItems)
 
 # printItem:
 # Prints out a dataclass. Starts with dataclass name, followed by all of its fields
 def printItem(item, itemNum = 1, totalItems = 1):
 	itemKeys = [*item.__annotations__]
-	itemType = f'{str(type(item)).split(".")[-1][:-2]}'
 	### ex: type(student) = <class 'students.students.Student'>
+	itemType = f'{str(type(item)).split(".")[-1][:-2]}'
 	itemAsDict = dataclass.asdict(item)
 	output=f'\n{itemType} ({itemNum}/{totalItems}):\n'
 	for key in itemKeys:

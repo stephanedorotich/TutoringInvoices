@@ -51,12 +51,12 @@ def importBooleanFromString(val):
 def importDateTimeFromString(val):
 	try:
 		return datetime.fromisoformat(val)
-	except ValueError: raise ValueError(f'Value: \'{val}\' is not an ISO format Datetime')
+	except ValueError: raise ValueError(f'Value: \'{val}\' is not an ISO format Datetime (YYYY-MM-DD HH:mm)')
 
 def importDateFromString(val):
 	try:
 		return date.fromisoformat(val)
-	except ValueError: raise ValueError(f'Value: \'{val}\' is not an ISO format Date')
+	except ValueError: raise ValueError(f'Value: \'{val}\' is not an ISO format Date (YYYY-MM-DD)')
 
 def importFloatFromString(val):
 	try:

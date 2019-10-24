@@ -5,9 +5,7 @@ from datetime import date
 @dataclass
 class Invoice:
 	key: int
-	student: str
-	date: date
-	total: float
-	sessions: list
-	paid: bool
+	student: str = ''
+	date: date = date.today()
+	sessions: list = None
 	printed: bool = False

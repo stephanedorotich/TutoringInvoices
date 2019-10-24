@@ -5,11 +5,13 @@ import csv
 from datetime import date
 from .invoices import Invoice
 from sessions import sessionManager as xm
+from students import studentManager as sm
 from pdfs import pdfManager as pm
 import helpers as h
+import uihelpers as uih
 
-invoices = []
 invoiceKey = 0
+invoices = []
 
 def loadInvoices(destination = 'invoices'):
 	filename = f'{destination}.csv'
@@ -21,13 +23,12 @@ def loadInvoices(destination = 'invoices'):
 					key = h.importIntegerFromString(row[0]),
 					student = row[1],
 					date = h.importDateFromString(row[2]),
-					total = h.importFloatFromString(row[3]),
-					sessions = h.importListFromString(row[4]),
-					paid = h.importBooleanFromString(row[5]),
-					printed = h.importBooleanFromString(row[6]))
+					sessions = h.importListFromString(row[3]),
+					printed = h.importBooleanFromString(row[4]))
 				invoices.append(invoice)
 			global invoiceKey
-			invoiceKey = invoices[-1].key
+			if not len(invoices) == 0:
+				invoiceKey = invoices[-1].key
 	except FileNotFoundError:
 		print(f'File({filename}) does not exist')
 
@@ -39,14 +40,14 @@ def saveInvoices(destination = 'invoices'):
 			csv_writer.writerow(exportInvoice(invoice))
 
 def exportInvoice(i):
-	return [i.key, i.student, i.date, i.total, i.sessions, i.paid, i.printed]
+	return [i.key, i.student, i.date, i.sessions, i.printed]
 
 def findInvoice(key):
-	try:
-		results = h.findSingle(invoices,key)
-		return results
-	except ValueError as e:
-		print(e)
+	results = h.findSingle(invoices,key)
+	return results
+#try-except block now found in uihelpers.openRecentInvoice()
+#	except ValueError as e:
+#		print(e)
 
 def findInvoices(keys):
 	try:
@@ -55,33 +56,74 @@ def findInvoices(keys):
 	except ValueError as e:
 		print(e)
 
-def createNewInvoiceForStudent(student, paid = False):
-	global invoiceKey
-	invoiceKey+=1
-	dateOfInvoice = date.today()
-	total = 0
+def newInvoiceUI():
+	createMonthlyInvoice(sm.pickStudent('to generate invoice for'),
+		uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]))
+
+def createMonthlyInvoice(student, month):
 	sessionKeys = []
 	sessions = xm.findSessions(student.sessions)
+	dateOfInvoice = date.today()
+
 	for session in sessions:
-		if not session.invoiced:
-			total += session.duration*student.rate
+		if session.datetime.month == month:
 			sessionKeys.append(session.key)
-			session.invoiced = True
 	if not sessionKeys:
-		print("No new sessions to invoice for this Student\n")
+		print("No sessions to invoice this Student for this month")
 		return
-	invoice = Invoice(invoiceKey,student.name,dateOfInvoice,total,sessionKeys,paid)
-	invoices.append(invoice)
+
+	invoice = None
+	for key in student.invoices:
+		temp = findInvoice(key)
+		if temp.date.month == month:
+			invoice = findInvoice(key)
+			if not sessionKeys == invoice.sessions:
+				changeAttribute(invoice,'sessions',sessionKeys)
+				changeAttribute(invoice,'date',dateOfInvoice)
+				changeAttribute(invoice,'printed',False)
+
+	if invoice == None:
+		global invoiceKey
+		invoiceKey+=1
+		invoice = Invoice(invoiceKey,student.name,dateOfInvoice,sessionKeys)
+		invoices.append(invoice)
+
 	if not invoiceKey in student.invoices:
 		student.invoices.append(invoiceKey)
-	return invoiceKey
 
-def deleteInvoice(key):
-	invoice = findInvoice(key)[0]
-	#TODO do stuff
+def openRecentInvoiceUI():
+	student = sm.pickStudent("to open the most recent invoice of")
+	if not len(student.invoices) == 0:
+		try:
+			invoice = findInvoice(student.invoices[-1])
+			pm.openPDF(invoice)
+		except ValueError as e:
+			print(e)
+	else:
+		raise ValueError('This student has no recent invoice to open')
 
-def generatePDF(key):
+def printPDF(key):
 	invoice = findInvoice(key)
 	if not invoice.printed:
-		pm.generatePDF(invoice)
+		pm.printPDF(invoice)
 		invoice.printed = True
+
+def printRecentInvoice():
+	student = sm.pickStudent("to open the print the recent invoice of")
+	if not len(student.invoices) == 0:
+		try:
+			invoice = findInvoice(student.invoices[-1])
+			printPDF(invoice.key)
+		except ValueError as e:
+			print(e)
+	else:
+		raise ValueError('This student has no recent invoice to print')
+
+def changeAttribute(self,attributeName,newValue):
+	switch = [*Invoice.__annotations__]
+	if attributeName == switch[2]:
+		self.date = newValue
+	if attributeName == switch[3]:
+		self.sessions = newValue
+	if attributeName == switch[4]:
+		self.printed = newValue
