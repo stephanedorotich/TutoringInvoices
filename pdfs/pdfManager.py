@@ -43,7 +43,7 @@ def printPDF(invoice):
 Stéphane Dorotich \hfill 587-434-7693 \\
 10 West Beynon Rise, Cochrane, AB \hfill stephanedorotich@gmail.com \\
 
-{\large \sc Invoice To:} \hfill {\sc Date:} INVOICEDATE \\
+{\large \sc Invoice To:} \hfill {\sc Date:} INVOICEDATE\\
 NAME PHONENUM EMAIL ADDRESS'''
 	header = fillHeader(header, student, invoice)
 
