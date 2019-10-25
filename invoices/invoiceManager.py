@@ -43,40 +43,56 @@ def exportInvoice(i):
 	return [i.key, i.student, i.date, i.sessions, i.printed]
 
 def findInvoice(key):
-	results = h.findSingle(invoices,key)
-	return results
-#try-except block now found in uihelpers.openRecentInvoice()
-#	except ValueError as e:
-#		print(e)
-
-def findInvoices(keys):
 	try:
-		results = h.findMultiple(invoices,keys)
+		results = h.findSingle(invoices,key)
 		return results
 	except ValueError as e:
 		print(e)
 
+def findInvoices(keys):
+	results = h.findMultiple(invoices,keys)
+	return results
+
 def newInvoiceUI():
-	createMonthlyInvoice(sm.pickStudent('to generate invoice for'),
+	createMonthlyInvoice(
+		sm.pickStudent('to generate invoice for'),
 		uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]))
+
+def generateInvoicesByMonth(students,month):
+	for student in students:
+		try:
+			createMonthlyInvoice(student, month)
+		except ValueError as e:
+			print(e)
+	global invoices
+	for invoice in invoices:
+		printPDF(invoice.key)
 
 def createMonthlyInvoice(student, month):
 	sessionKeys = []
-	sessions = xm.findSessions(student.sessions)
+	try:
+		sessions = xm.findSessions(student.sessions)
+	except ValueError as e:
+		print(f'{student.name} has no sessions to invoice for this month')
+		return
 	dateOfInvoice = date.today()
 
 	for session in sessions:
 		if session.datetime.month == month:
 			sessionKeys.append(session.key)
 	if not sessionKeys:
-		print("No sessions to invoice this Student for this month")
+		print(f'{student.name} has no sessions to invoice for this month')
 		return
 
 	invoice = None
 	for key in student.invoices:
 		temp = findInvoice(key)
 		if temp.date.month == month:
-			invoice = findInvoice(key)
+			if not student.name == temp.student:
+				student.invoices.remove(key)
+				raise ValueError(f'''Invoice({invoice.key}) belongs to {invoice.student}\n
+But {student.name} has its key. Something is wrong in the database(you probably shouldn't be here)''')
+			invoice = temp
 			if not sessionKeys == invoice.sessions:
 				changeAttribute(invoice,'sessions',sessionKeys)
 				changeAttribute(invoice,'date',dateOfInvoice)
@@ -88,7 +104,7 @@ def createMonthlyInvoice(student, month):
 		invoice = Invoice(invoiceKey,student.name,dateOfInvoice,sessionKeys)
 		invoices.append(invoice)
 
-	if not invoiceKey in student.invoices:
+	if not invoice.key in student.invoices:
 		student.invoices.append(invoiceKey)
 
 def openRecentInvoiceUI():
@@ -118,6 +134,19 @@ def printRecentInvoice():
 			print(e)
 	else:
 		raise ValueError('This student has no recent invoice to print')
+
+def payInvoiceUI():
+	student = sm.pickStudent('to pay an Invoice for')
+	invoice = findInvoice(uih.getChoice(f'Please select an invoice: {student.invoices}',student.invoices))
+	uih.printItem(invoice)
+	confirmPaid = uih.getChoice(f'Would you like to pay this invoice',uih.yn)
+	if confirmPaid == '' or confirmPaid == 'y':
+		sessions = xm.findSessions(invoice.sessions)
+		paymentType = uih.getChoice(f'Please indicate the payment type',['cash','e-transfer','cheque'])
+		for session in sessions:
+			if not session.paid:
+				session.paid = True
+				session.paymentType = paymentType
 
 def changeAttribute(self,attributeName,newValue):
 	switch = [*Invoice.__annotations__]

@@ -27,10 +27,10 @@ def mainMenu():
 def studentMenu():
 	print("\nSTUDENT MENU:\t\t(Q: quit)")
 	query = '''Would you like to:
-\t1. Add a new student
-\t2. Edit a student
-\t3. View a student
-\t4. View all students'''
+\t1. Add New
+\t2. Edit
+\t3. View Student
+\t4. View All'''
 	options = ['1','2','3','4']
 	choice = uih.getChoice(query,options)
 	if choice == options[0]:
@@ -45,7 +45,7 @@ def studentMenu():
 
 def sessionMenu():
 	name = "SESSION MENU"
-	options = ['Add new session(s)','View all sessions']
+	options = ['Add New','View All']
 
 	query = f'\n{name}:\t\t(Q: quit)\nWould you like to:'
 	listener = []
@@ -65,11 +65,13 @@ def sessionMenu():
 def invoiceMenu():
 	print("\nINVOICE MENU:\t\t(Q: quit)")
 	query = '''Would you like to:
-\t1. View most recent invoice by student
-\t2. View all invoices
-\t3. Create a monthly invoice by student
-\t4. Print most recent invoice for'''
-	options = ['1','2','3','4']
+\t1. Open PDF
+\t2. View All
+\t3. Create Invoice
+\t4. Print Invoice
+\t5. Generate Invoices
+\t6. Pay Invoice'''
+	options = ['1','2','3','4','5','6']
 	choice = uih.getChoice(query,options)
 	if choice == options[0]:
 		try:
@@ -88,6 +90,11 @@ def invoiceMenu():
 			im.printRecentInvoice()
 		except ValueError as e:
 			print(e)
+	if choice == options[4]:
+		im.generateInvoicesByMonth(sm.students,
+			uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]))
+	if choice == options[5]:
+		im.payInvoiceUI()
 	mainMenu()
 
 def run():
