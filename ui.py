@@ -1,9 +1,10 @@
 # ui.py
 import sys
 import sessions.sessionManager as xm
-import students.studentManager as sm
+import students.studentManager
 import invoices.invoiceManager as im
 import uihelpers as uih
+import analyzer
 #	Must be able ot generate new invoices. - TODO
 #		Functionality uncertain. Perhaps iterates through all students and prints invoices,
 #		maybe automatically does so at the end of the month?
@@ -14,15 +15,18 @@ def mainMenu():
 	print("MAIN MENU:\t\t(Q: quit)")
 	query = '''\tstudents
 \tsessions
-\tinvoices'''
-	options = ['students','sessions','invoices', '1', '2', '3']
+\tinvoices
+\tanalysis'''
+	options = ['students','sessions','invoices','analysis','1','2','3','4']
 	choice = uih.getChoice(query,options)
-	if choice == options[0] or choice == options[3]:
+	if choice == options[0] or choice == options[4]:
 		studentMenu()
-	if choice == options[1] or choice == options[4]:
+	if choice == options[1] or choice == options[5]:
 		sessionMenu()
-	if choice == options[2] or choice == options[5]:
+	if choice == options[2] or choice == options[6]:
 		invoiceMenu()
+	if choice == options[3] or choice == options[7]:
+		analysisMenu()
 
 def studentMenu():
 	print("\nSTUDENT MENU:\t\t(Q: quit)")
@@ -96,6 +100,23 @@ def invoiceMenu():
 	if choice == options[5]:
 		im.payInvoiceUI()
 	mainMenu()
+
+def analysisMenu():
+	name = "ANALYSIS MENU"
+	options = ['Total Income']
+
+	query = f'\n{name}:\t\t(Q: quit)\nWould you like to:'
+	listener = []
+
+	for n in range(len(options)):
+		query+=f'\n\t{n+1}. {options[n]}'
+		listener.append(str(n+1))
+
+	choice = uih.getChoice(query,listener)
+	if choice == listener[0]:
+		analyzer.getTotalIncome(xm.sessions)
+	mainMenu()
+
 
 def run():
 	im.loadInvoices()

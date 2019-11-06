@@ -9,4 +9,3 @@ class Invoice:
 	date: date = date.today()
 	sessions: list = None
 	printed: bool = False
-#	sent: bool = False
