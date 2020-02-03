@@ -13,7 +13,6 @@ result in the program quitting WITHOUT SAVING ANY CHANGES.
 - Each of the Student, Session, and Invoice Menu have a 'View All' option. This is an
 easy way to verify any changes you made to objects or any new objects you create.
 - Presently, when generating the invoice pdf, any paid session will pass a 'RATE' of 0$/hr so that it doesn't get added to the total amount owing. This is not the desired functionality, but a consequence of the invoice template that I'm using not being able to record a downpayment on the invoice.
-- Presently, I've modified the invoices.csv file so that all the 'printed' fields are False. This allows the user to generate fresh pdf invoices by running the GenerateInvoices command.
 
 To Run: >> python ui.py
 - Typing 'python ui.py' in Terminal or Command Prompt will launch the User Interface
@@ -37,18 +36,36 @@ File Descriptions:
 'students/students.py' 		is the data class file that defines a STUDENT
 
 'invoices/invoiceManager.py' 	loads, TODO modifies, generates, TODO deletes, and saves invoices
-'sessions/sessioneManager.py' 	loads, TODO modifies, generates, TODO deletes, and saves sessions
+'sessions/sessionManager.py' 	loads, TODO modifies, generates, TODO deletes, and saves sessions
 'students/studentManager.py' 	loads, modifies, generates, TODO deletes, and saves students
 'pdfs/pdfManager.py' 		writes a pdf for a given invoice, uses LaTeX
 
 
 TODO:
 - need to write missing documentation
-- need to protect payment type of session so that it is only 'cash', 'e-transfer', or 'cheque'
-- need to modify newSessionUI() so that it does not ask for the 'paid' or 'paymentType' fields
-- need functionality to indicate if a session has been paid for on input
+	studentManager
+	sessionManager
+	invoiceManager
+	pdfManager
+
+	analyzer
+	helpers
+	uihelpers
+	ui
+- store corrupt row from csv load in virtual memory, and save it in place
+- OR prompt user to correct error in corrupt row.
 - need to modify sm.editStudent() to have a better print statement to display changes.
 - need to find a new invoice template so I can handle 'paid' sessions more effectively
+- need to implement DELETE functions for sessions (maybe for students & invoices also)
+- Functionality for combo sessions????
+- sessionManager -> getStudentSessions(student: Student): return a list of a student's sessions
+- sessionManager -> getMonthSessions(month: int): return a list of sessions for the given month
+- Implement a BACKUP function that saves all my data to a diff location...
+- Currently, if two students share a name, my minimum_search_query_length is forced to be quite large (annoying to deal with). Alternatively, I can nix the minimum_search_query_length entirely, and instead build functionality so if a single search query yields multiple results, user is prompted to PICK ONE.
+- Implement a user class
+- need to implement ability to edit sessions
+
+
 
 
 NOTES TO SELF:

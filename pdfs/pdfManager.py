@@ -1,11 +1,11 @@
 # invoicePDFGenerator.py
-import os
 import sys
 sys.path.insert(0, '../')
 import os,glob,subprocess,shutil
 from invoices import invoiceManager as im
 from sessions import sessionManager as xm
 from students import studentManager as sm
+import uihelpers as uih
 
 def getFileName(invNum, studentName):
 	return f'TutoringInvoice{invNum}-{studentName.split(" ")[0]}'
@@ -110,10 +110,7 @@ SESSIONS
 	main = main.replace('''STUDENTNAME''',f'{student.name}')
 	body = ''''''
 	for session in sessions:
-		if session.paid:
-			RATE = 0
-		else:
-			RATE = student.rate
+		RATE = student.rate
 		DATE = session.datetime
 		DURATION = session.duration
 		line = f'''\\hourrow{{{DATE}}}{{{DURATION}}}{{{RATE}}}

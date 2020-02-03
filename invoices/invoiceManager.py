@@ -23,8 +23,9 @@ def loadInvoices(destination = 'invoices'):
 					key = h.importIntegerFromString(row[0]),
 					student = row[1],
 					date = h.importDateFromString(row[2]),
-					sessions = h.importListFromString(row[3]),
-					printed = h.importBooleanFromString(row[4]))
+					billingMonth = h.importDateFromString(row[3]),
+					sessions = h.importListFromString(row[4]),
+					printed = h.importBooleanFromString(row[5]))
 				invoices.append(invoice)
 			global invoiceKey
 			if not len(invoices) == 0:
@@ -40,12 +41,12 @@ def saveInvoices(destination = 'invoices'):
 			csv_writer.writerow(exportInvoice(invoice))
 
 def exportInvoice(i):
-	return [i.key, i.student, i.date, i.sessions, i.printed]
+	return [i.key, i.student, i.date, i.billingMonth, i.sessions, i.printed]
 
 def findInvoice(key):
 	try:
-		results = h.findSingle(invoices,key)
-		return results
+		result = h.findSingle(invoices,key)
+		return result
 	except ValueError as e:
 		print(e)
 
@@ -54,11 +55,13 @@ def findInvoices(keys):
 	return results
 
 def newInvoiceUI():
-	createMonthlyInvoice(
+	key = createMonthlyInvoice(
 		sm.pickStudent('to generate invoice for'),
 		uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]))
+	if not key == None:
+		printPDF(key)
 
-def generateInvoicesByMonth(students,month):
+def generateInvoicesByMonth(students, month):
 	for student in students:
 		try:
 			createMonthlyInvoice(student, month)
@@ -73,12 +76,12 @@ def createMonthlyInvoice(student, month):
 	try:
 		sessions = xm.findSessions(student.sessions)
 	except ValueError as e:
-		print(f'{student.name} has no sessions to invoice for this month')
+		print(f'{student.name} has no sessions')
 		return
 	dateOfInvoice = date.today()
 
 	for session in sessions:
-		if session.datetime.month == month:
+		if session.datetime.month == month and session.datetime.year == date.today().year:
 			sessionKeys.append(session.key)
 	if not sessionKeys:
 		print(f'{student.name} has no sessions to invoice for this month')
@@ -86,13 +89,8 @@ def createMonthlyInvoice(student, month):
 
 	invoice = None
 	for key in student.invoices:
-		temp = findInvoice(key)
-		if temp.date.month == month:
-			if not student.name == temp.student:
-				student.invoices.remove(key)
-				raise ValueError(f'''Invoice({invoice.key}) belongs to {invoice.student}\n
-But {student.name} has its key. Something is wrong in the database(you probably shouldn't be here)''')
-			invoice = temp
+		if findInvoice(key).billingMonth.month == month:
+			invoice = findInvoice(key)
 			if not sessionKeys == invoice.sessions:
 				changeAttribute(invoice,'sessions',sessionKeys)
 				changeAttribute(invoice,'date',dateOfInvoice)
@@ -100,12 +98,14 @@ But {student.name} has its key. Something is wrong in the database(you probably 
 
 	if invoice == None:
 		global invoiceKey
+		global invoices
 		invoiceKey+=1
-		invoice = Invoice(invoiceKey,student.name,dateOfInvoice,sessionKeys)
+		invoice = Invoice(invoiceKey,student.name,dateOfInvoice,date(date.today().year, month, 1), sessionKeys)
 		invoices.append(invoice)
 
 	if not invoice.key in student.invoices:
 		student.invoices.append(invoiceKey)
+	return invoice.key
 
 def openRecentInvoiceUI():
 	student = sm.pickStudent("to open the most recent invoice of")
@@ -116,7 +116,7 @@ def openRecentInvoiceUI():
 		except ValueError as e:
 			print(e)
 	else:
-		raise ValueError('This student has no recent invoice to open')
+		raise ValueError('This student has no invoices')
 
 def printPDF(key):
 	invoice = findInvoice(key)
@@ -124,16 +124,8 @@ def printPDF(key):
 		pm.printPDF(invoice)
 		invoice.printed = True
 
-def printRecentInvoice():
-	student = sm.pickStudent("to open the print the recent invoice of")
-	if not len(student.invoices) == 0:
-		try:
-			invoice = findInvoice(student.invoices[-1])
-			printPDF(invoice.key)
-		except ValueError as e:
-			print(e)
-	else:
-		raise ValueError('This student has no recent invoice to print')
+def getInvoicesByStudent(student):
+	return findInvoices(student.invoices)
 
 def payInvoiceUI():
 	student = sm.pickStudent('to pay an Invoice for')
@@ -152,7 +144,7 @@ def changeAttribute(self,attributeName,newValue):
 	switch = [*Invoice.__annotations__]
 	if attributeName == switch[2]:
 		self.date = newValue
-	if attributeName == switch[3]:
-		self.sessions = newValue
 	if attributeName == switch[4]:
+		self.sessions = newValue
+	if attributeName == switch[5]:
 		self.printed = newValue
