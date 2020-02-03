@@ -1,0 +1,5 @@
+# wishlist
+
+Have invoices save in two separate folders, paid and unpaid, have them move directories once paid.
+
+Have all Session & Invoice 'searches' go by key->index, not a linear search...

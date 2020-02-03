@@ -7,58 +7,102 @@ import helpers as h
 import uihelpers as uih
 import copy
 
-MINIMUM_SEARCH_QUERY_LENGTH = 3
 students = []
 
-def loadStudents(destination = 'students'):
-	filename = f'{destination}.csv'
+def loadStudents(filename = 'students.csv'):
+	"""Reads the csv file and generates a list of Student objects
+
+	For every row in the csv file, generate a Student object with the attributes specified in the row and append it to the 'students' list
+
+	When 'students' has been populated, updates the Minimum_Search_Query_Length (the # of chars necessary for a search of the students to yield a unique result)
+
+	Args:
+		filename (str): the filename to load (default is 'students.csv')
+
+	Returns:
+		None
+	"""
 	try:
 		with open(filename, 'r') as csv_file:
 			csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
 			for row in csv_reader:
-				student = Student(
-					name = row[0],
-					sPhoneNum = row[1],
-					sEmail = row[2],
-					pName = row[3],
-					pPhoneNum = row[4],
-					pEmail = row[5],
-					pAddress = row[6],
-					rate = h.importIntegerFromString(row[7]),
-					invoices = h.importListFromString(row[8]),
-					sessions = h.importListFromString(row[9]))
-				students.append(student)
-			updateMinimumSearchQueryLength()
+				try:
+					student = Student(
+						name = row[0],
+						sPhoneNum = row[1],
+						sEmail = row[2],
+						pName = row[3],
+						pPhoneNum = row[4],
+						pEmail = row[5],
+						pAddress = row[6],
+						rate = h.importIntegerFromString(row[7]),
+						invoices = h.importListFromString(row[8]),
+						sessions = h.importListFromString(row[9]))
+					students.append(student)
+				except ValueError as e:
+					print(f'Error in line {csv_reader.line_num} of {filename}\n')
+					raise e
 	except FileNotFoundError:
 		print(f'File({filename}) does not exist')
 
-def saveStudents(destination = 'students'):
-	filename = f"{destination}.csv"
+def saveStudents(filename = 'students.csv'):
+	"""Saves all Student objects in students to a csv file with given filename
+
+	Args:
+		filename (str): the destination to save sessions (default is students.csv)
+
+	Returns:
+		None
+	"""
 	with open(filename, 'w') as csv_file:
 		writer = csv.writer(csv_file, delimiter=',', quotechar = '"', quoting =csv.QUOTE_MINIMAL)
 		for student in students:
 			writer.writerow(exportStudent(student))
 
 def exportStudent(s):
+	"""Given a Student, returns a list of its attributes.
+
+	Args:
+		s (Student): the Student whose attributes are to be exported as a list
+
+	Returns:
+		list: a list of s's attributes
+	"""	
 	return [s.name, s.sPhoneNum, s.sEmail, s.pName, s.pPhoneNum, s.pEmail, s.pAddress, s.rate, s.invoices, s.sessions]
 
 def findStudent(name):
-	if len(name) < MINIMUM_SEARCH_QUERY_LENGTH:
-		raise ValueError(f'Search queries must be at least {MINIMUM_SEARCH_QUERY_LENGTH} in length')
-	else:
-		results = []
-		for student in students:
-			if name.lower() in student.name.lower():
-				results.append(student)
-		if not results:
-			raise ValueError(f'There is no student that matches the query: {name}')
-		elif len(results) == 1:
-			return results[0]
-		else:
-			raise ValueError(f'There are multiple students that match the query: {name}')
+	"""Given a name (str) search query, returns the corresponding Student. Raises a ValueError if the search query is not at least the length of the MINIMUM_SEARCH_QUERY_LENGTH
 
-# >> gonna have to move to a new file
+	Args:
+		name (str): a name fragment to search students for (can be an entire name, but expected to be just a few chars)
+	
+	Raises:
+		ValueError
+
+	Returns:
+		Student: the student that matches the given search query
+	"""
+	results = []
+	for s in students:
+		if name.lower() in s.name.lower():
+			results.append(s)
+	if not results:
+		raise ValueError(f'There is no student that matches the query: {name}')
+	if len(results) == 1:
+		return results[0]
+	else:
+		print(f'There are multiple students who match the query: {name}')
+		return results[uih.menuDisplay(None,[s.name for s in results])-1]
+
 def newStudentUI():
+	"""Guides the user through the creation of a new Student object
+
+	1. Prompts the user to input the values of a Student's attributes. These values are validated and the Student's attributes are set to them.
+
+	2. Displays the created Student and asks the user if they want to save the Student. If YES, this Student is appended to the 'students' list to be saved when the program Quits.
+
+	# INTERFACE
+	"""
 	fields = [*Student.__annotations__][:-2]
 	student = Student()
 	for f in fields:
@@ -79,15 +123,25 @@ STUDENT GENERATED SUCCESSFULLY
 	uih.printItem(student)
 	print('******************************\n******************************\n')
 	x = uih.getChoice('Would you like to save this Student?',uih.yn)
+	student.invoices = []
+	student.sessions = []
 	if x == 'y' or x == '':
 		students.append(student)
 		print("Student saved...\n")
-		updateMinimumSearchQueryLength()
 
-# >> gonna have to move to a new file
 def editStudentUI():
+	"""Guides the user through the editing of a Student
+
+	1. Prompts the user to pick a student 'to edit'
+
+	2. Prompts the user to input a value for any attribute they wish to edit.
+
+	3. Displays the edits proposed by the user, and asks the user to confirm that they would like to save these edits. If YES, all the Student's attributes are updated to the new values. If NO, no changes are saved.
+
+	# INTERFACE
+	"""
 	fields = [*Student.__annotations__][:-2]
-	## so user cannot edit 'sessions' or 'invoices' (last 2 fields for a Student)
+	# last 2 fields of Student are omited so user cannot edit 'sessions' or 'invoices'
 	student = pickStudent("to edit")
 	edits = []
 	for f in fields:
@@ -127,15 +181,18 @@ def editStudentUI():
 *******************************''')
 		uih.printItem(student)
 		print('*******************************\n*******************************\n')
-	
 
-# >> gonna have to move to a new file
-def viewStudentUI():
-	student = pickStudent("to view")
-	uih.printItem(student)
-
-# >> gonna have to move to a new file
 def pickStudent(op):
+	"""Prompts the user to select a Student on which to perform the given operation (op).
+
+	Args:
+		op (str): A message for the user to indicate what operation the Student is being selected for.
+
+	Returns:
+		Student: The student selected by the user
+
+	# INTERFACE
+	"""
 	while True:
 		userInput = uih.listener(input(f'Which Student would you like {op}? '))
 		try:
@@ -144,29 +201,40 @@ def pickStudent(op):
 			print(e)
 			continue
 		if uih.doubleCheck(student.name):
-			return student
+			return student	
+
+def viewStudentUI():
+	"""Guides the user through the selection of a Student to view
+
+	1. Prompts the user to select a Student 'to view'
+
+	2. Prints out the selected Student's Attributes
+
+	# INTERFACE
+	"""
+	student = pickStudent("to view")
+	uih.printItem(student)
 
 def addSessionKey(student,key):
-	student.sessions.append(key)
+	"""Adds the given Session Key to the given Student's Session Keys
 
-def updateMinimumSearchQueryLength():
-	global MINIMUM_SEARCH_QUERY_LENGTH
-	initial = MINIMUM_SEARCH_QUERY_LENGTH
-	for student in students:
-		for n in range(len(student.name)-MINIMUM_SEARCH_QUERY_LENGTH+1):
-			val = student.name[n:n+MINIMUM_SEARCH_QUERY_LENGTH]
-			try:
-				findStudent(val)
-			except ValueError as e:
-				print(e)
-				MINIMUM_SEARCH_QUERY_LENGTH+=1
-				updateMinimumSearchQueryLength()
-				break
-		if initial < MINIMUM_SEARCH_QUERY_LENGTH:
-			print(f'New minimum search query length is: {MINIMUM_SEARCH_QUERY_LENGTH}')
-			break
+	Args:
+		student (Student): the student to add the given Session Key to
+		key (int): the Session Key to add to the given Student
+	"""
+	if student.sessions:
+		student.sessions.append(key)
+	else:
+		student.sessions = [key]
 
 def changeAttribute(self,attributeName,newValue):
+	"""Given a Student and attributeName, sets the value of that attribute to the new Value.
+
+	Args:
+		self (Student): A Student to be modified
+		attributeName (str): The name of the attribute to modify
+		newValue (str): The new value to set the attribute to
+	"""
 	switch = [*Student.__annotations__]
 	if attributeName == switch[0]:
 		self.name = newValue

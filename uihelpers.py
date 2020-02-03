@@ -14,7 +14,7 @@ import invoices.invoiceManager as im
 ###########################################################################
 
 isTest = False
-yn = ['y', 'n', '']
+yn = ['y','n','']
 
 # listener:
 # listends for COMMAND keys
@@ -51,13 +51,7 @@ def quit():
 # quitTest:
 # called when user inputs Q and when var isTest = True (which occurs when user inputs TEST)
 # does not save invoices, students, or sessions
-# performs various programmer defined actions.
-# TODO: enable user control do perform various operations
 def quitTest():
-#	printItems(im.invoices)
-#	printItems(xm.sessions)
-#	printItems(sm.students)
-#	im.printPDF(0)
 	sys.exit()
 
 # doubleCheck
@@ -90,6 +84,20 @@ def getChoice(query,choices):
 		except ValueError as e:
 			print(e)
 
+def menuDisplay(name, options):
+	query = ''
+	if name:
+		query+=f'\n{name}:\t\t(Q: quit)\nSelect one of the following:'
+	else:
+		query+='Select one of the following:'
+	for n in range(len(options)):
+		query+=f'\n\t{n+1}. {options[n]}'
+
+	choices = [str(n+1) for n in range(len(options))]
+
+	return int(getChoice(query, choices))
+
+
 # validateChoice
 # checks to see if userinput.lower() is one of the options in choices
 # if not, raises ValueError
@@ -105,10 +113,7 @@ def validateChoice(userinput,choices):
 			if int(userinput) == choice:
 				return choice
 	else:
-		options = ", ".join(choices)
-		if choices[-1]=='':
-			options+='enter'
-		raise ValueError(f'\"{userinput}\" is not one of the options: ({options})\n')
+		raise ValueError(f'\"{userinput}\" is not one of the options: {choices}\n')
 
 # printItems:
 # Takes a list of Students, Sessions, or Invoices (any kind of dataclass)
@@ -131,4 +136,4 @@ def printItem(item, itemNum = 1, totalItems = 1):
 	output=f'\n{itemType} ({itemNum}/{totalItems}):\n'
 	for key in itemKeys:
 		output+=f'\t{key}: {itemAsDict[key]}\n'
-	print(output)
+	print(output[:-1])

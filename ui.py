@@ -1,122 +1,82 @@
 # ui.py
 import sys
 import sessions.sessionManager as xm
-import students.studentManager
+import students.studentManager as sm
 import invoices.invoiceManager as im
 import uihelpers as uih
 import analyzer
-#	Must be able ot generate new invoices. - TODO
-#		Functionality uncertain. Perhaps iterates through all students and prints invoices,
-#		maybe automatically does so at the end of the month?
-
 
 # MENUS
 def mainMenu():
-	print("MAIN MENU:\t\t(Q: quit)")
-	query = '''\tstudents
-\tsessions
-\tinvoices
-\tanalysis'''
-	options = ['students','sessions','invoices','analysis','1','2','3','4']
-	choice = uih.getChoice(query,options)
-	if choice == options[0] or choice == options[4]:
+	name = "MAIN MENU"
+	options = ['students','sessions','invoices','analysis']
+	choice = uih.menuDisplay(name, options)
+	if choice == 1:
 		studentMenu()
-	if choice == options[1] or choice == options[5]:
+	if choice == 2:
 		sessionMenu()
-	if choice == options[2] or choice == options[6]:
+	if choice == 3:
 		invoiceMenu()
-	if choice == options[3] or choice == options[7]:
+	if choice == 4:
 		analysisMenu()
 
 def studentMenu():
-	print("\nSTUDENT MENU:\t\t(Q: quit)")
-	query = '''Would you like to:
-\t1. Add New
-\t2. Edit
-\t3. View Student
-\t4. View All'''
-	options = ['1','2','3','4']
-	choice = uih.getChoice(query,options)
-	if choice == options[0]:
+	name = "STUDENT MENU"
+	options = ['Add New','View All','View Student','Edit']
+	choice = uih.menuDisplay(name, options)
+	if choice == 1:
 		sm.newStudentUI()
-	if choice == options[1]:
-		sm.editStudentUI()
-	if choice == options[2]:
-		sm.viewStudentUI()
-	if choice == options[3]:
+	if choice == 2:
 		uih.printItems(sm.students)
+	if choice == 3:
+		sm.viewStudentUI()
+	if choice == 4:
+		sm.editStudentUI()
 	mainMenu()
 
 def sessionMenu():
 	name = "SESSION MENU"
-	options = ['Add New','View All']
-
-	query = f'\n{name}:\t\t(Q: quit)\nWould you like to:'
-	listener = []
-
-	for n in range(len(options)):
-		query+=f'\n\t{n+1}. {options[n]}'
-		listener.append(str(n+1))
-
-	choice = uih.getChoice(query,listener)
-
-	if choice == listener[0]:
+	options = ['Add New','View All', 'View by Student']
+	choice = uih.menuDisplay(name, options)
+	if choice == 1:
 		xm.newSessionUI()
-	if choice == listener[1]:
+	if choice == 2:
 		uih.printItems(xm.sessions)
+	if choice == 3:
+		uih.printItems(xm.getSessionsByStudent(sm.pickStudent("to view the sessions of")))
 	mainMenu()
 
 def invoiceMenu():
-	print("\nINVOICE MENU:\t\t(Q: quit)")
-	query = '''Would you like to:
-\t1. Open PDF
-\t2. View All
-\t3. Create Invoice
-\t4. Print Invoice
-\t5. Generate Invoices
-\t6. Pay Invoice'''
-	options = ['1','2','3','4','5','6']
-	choice = uih.getChoice(query,options)
-	if choice == options[0]:
+	name = "INVOICE MENU"
+	options = ['Open PDF','View All', 'View by Student','Create Invoice','Generate Invoices','Pay Invoice']
+	choice = uih.menuDisplay(name, options)
+	if choice == 1:
 		try:
 			im.openRecentInvoiceUI()
 		except ValueError as e:
 			print(e)
-	if choice == options[1]:
+	if choice == 2:
 		uih.printItems(im.invoices)
-	if choice == options[2]:
-		try:
-			im.newInvoiceUI()
-		except ValueError as e:
-			print(e)
-	if choice == options[3]:
-		try:
-			im.printRecentInvoice()
-		except ValueError as e:
-			print(e)
-	if choice == options[4]:
+	if choice == 3:
+		uih.printItems(im.getInvoicesByStudent(sm.pickStudent("to view the invoices of")))
+	if choice == 4:
+		im.newInvoiceUI()
+	if choice == 5:
 		im.generateInvoicesByMonth(sm.students,
 			uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]))
-	if choice == options[5]:
+	if choice == 6:
 		im.payInvoiceUI()
 	mainMenu()
 
 def analysisMenu():
 	name = "ANALYSIS MENU"
-	options = ['Total Income']
-
-	query = f'\n{name}:\t\t(Q: quit)\nWould you like to:'
-	listener = []
-
-	for n in range(len(options)):
-		query+=f'\n\t{n+1}. {options[n]}'
-		listener.append(str(n+1))
-
-	choice = uih.getChoice(query,listener)
-	if choice == listener[0]:
+	options = ['Total Income', 'Monthly Incomes']
+	choice = uih.menuDisplay(name, options)
+	if choice == 1:
 		analyzer.getTotalIncome(xm.sessions)
+	if choice == 2:
+		analyzer.getIncomeByMonth(xm.sessions)
 	mainMenu()
-
 
 def run():
 	im.loadInvoices()
@@ -127,18 +87,6 @@ def run():
 		try:
 			mainMenu()
 		except StopIteration as e:
-			print(e)
 			continue
 
 run()
-
-#-->Sessions
-#	-->Delete
-#		-->Recent?
-#		-->Search
-#	-->Edit
-#		-->[*Sessions.__annotations__]
-#-->Students
-#	-->Delete
-#		-->Recent?
-#		-->Search
