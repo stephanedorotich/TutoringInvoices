@@ -87,6 +87,9 @@ def fillHeader(header,student,invoice):
 
 	if not len(EMAIL) == 0:
 		temp = r'''\tab EMAIL \\'''
+		print("_" in EMAIL)
+		if "_" in EMAIL:
+			EMAIL = EMAIL.replace("_",'''\_''')
 		header = header.replace("EMAIL",temp.replace("EMAIL",EMAIL))
 	else:
 		header = header.replace("EMAIL",'')

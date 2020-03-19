@@ -41,26 +41,51 @@
 41,Nathan Jasmin-Cara,2019-12-18 16:15:00,1.0,MATH90,True,e-transfer
 42,Grace Johnson,2019-12-18 17:30:00,1.0,MATH30-2,True,e-transfer
 43,Jacob Turgeon,2019-12-18 20:00:00,1.0,MATH10,True,e-transfer
-44,Grace Johnson,2020-01-06 16:00:00,1.0,MATH30-2,False,
-45,Kailey Sobocan,2020-01-07 14:45:00,1.0,MATH30-2,False,
-46,Nathan Jasmin-Cara,2020-01-12 11:00:00,1.5,MATH90,False,
-47,Bryn & Jacob White,2020-01-13 16:15:00,1.0,SCIE10,False,
-48,Hayden Agyeman,2020-01-13 17:45:00,1.5,MATH80,False,
+44,Grace Johnson,2020-01-06 16:00:00,1.0,MATH30-2,True,e-transfer
+45,Kailey Sobocan,2020-01-07 14:45:00,1.0,MATH30-2,True,e-transfer
+46,Nathan Jasmin-Cara,2020-01-12 11:00:00,1.5,MATH90,True,e-transfer
+47,Bryn & Jacob White,2020-01-13 16:15:00,1.0,SCIE10,True,e-transfer
+48,Hayden Agyeman,2020-01-13 17:45:00,1.5,MATH80,True,e-transfer
 49,Seren Ellis,2020-01-14 13:00:00,1.0,MATH30,True,e-transfer
-50,Kailey Sobocan,2020-01-14 14:45:00,1.0,MATH30-2,False,
+50,Kailey Sobocan,2020-01-14 14:45:00,1.0,MATH30-2,True,e-transfer
 51,Tate Pickard,2020-01-14 18:45:00,1.0,MATH90,True,cash
 52,Nikola Stelkic,2020-01-16 13:00:00,1.5,MATH30,True,cash
 53,Nikola Stelkic,2020-01-17 13:30:00,1.0,MATH30,True,cash
-54,Grace Johnson,2020-01-20 14:45:00,1.0,MATH30-2,False,
-55,Bryn & Jacob White,2020-01-20 16:15:00,1.0,SCIE10,False,
-56,Hayden Agyeman,2020-01-20 17:30:00,1.0,MATH80,False,
+54,Grace Johnson,2020-01-20 14:45:00,1.0,MATH30-2,True,e-transfer
+55,Bryn & Jacob White,2020-01-20 16:15:00,1.0,SCIE10,True,e-transfer
+56,Hayden Agyeman,2020-01-20 17:30:00,1.0,MATH80,True,e-transfer
 57,Seren Ellis,2020-01-20 19:30:00,1.5,MATH30,True,e-transfer
-58,Kailey Sobocan,2020-01-21 13:30:00,1.0,MATH30-2,False,
-59,Grace Johnson,2020-01-21 14:45:00,1.0,MATH30-2,False,
-61,Lucien Michaud,2020-01-21 16:15:00,1.0,MATH80,False,
+58,Kailey Sobocan,2020-01-21 13:30:00,1.0,MATH30-2,True,e-transfer
+59,Grace Johnson,2020-01-21 14:45:00,1.0,MATH30-2,True,e-transfer
+61,Lucien Michaud,2020-01-21 16:15:00,1.0,MATH80,True,e-transfer
 62,Tate Pickard,2020-01-21 18:45:00,1.0,MATH90,True,cash
-63,Bryn & Jacob White,2020-01-25 11:00:00,1.5,SCIE10,False,
+63,Bryn & Jacob White,2020-01-25 11:00:00,1.5,SCIE10,True,e-transfer
 64,Jacob Turgeon,2020-01-26 19:00:00,1.5,SCIE10,True,e-transfer
-65,Hayden Agyeman,2020-01-27 17:30:00,1.0,MATH80,False,
-66,Lucien Michaud,2020-01-28 16:15:00,1.0,MATH80,False,
+65,Hayden Agyeman,2020-01-27 17:30:00,1.0,MATH80,True,e-transfer
+66,Lucien Michaud,2020-01-28 16:15:00,1.0,MATH80,True,e-transfer
 67,Tate Pickard,2020-01-28 18:15:00,1.0,SCIE90,True,cash
+68,Hayden Agyeman,2020-02-03 17:30:00,1.0,MATH80,True,e-transfer
+69,Lucien Michaud,2020-02-04 16:15:00,1.0,MATH80,True,e-transfer
+70,Tate Pickard,2020-02-04 18:45:00,1.0,MATH80,True,cash
+71,Hayden Agyeman,2020-02-10 17:30:00,1.0,MATH80,True,e-transfer
+72,Lucien Michaud,2020-02-11 16:30:00,1.0,MATH80,True,e-transfer
+73,Tate Pickard,2020-02-11 18:45:00,1.0,MATH90,True,cash
+74,Hayden Agyeman,2020-02-24 17:30:00,1.0,MATH80,True,e-transfer
+75,Jake Gelinas,2020-02-12 17:30:00,1.0,MATH,True,e-transfer
+76,Lucien Michaud,2020-02-25 16:15:00,1.0,MATH80,True,e-transfer
+77,Tate Pickard,2020-02-25 18:45:00,1.0,MATH90,True,cash
+78,Halle Sidor,2020-02-26 15:30:00,1.0,MATH20-2,True,e-transfer
+79,Hayden Agyeman,2020-03-02 17:30:00,1.0,MATH80,False,
+80,Halle Sidor,2020-03-03 14:30:00,1.0,MATH20-2,False,
+81,Lucien Michaud,2020-03-03 16:15:00,1.0,MATH80,False,
+82,Sydney Bray,2020-03-03 17:30:00,1.0,CHEM30,False,
+83,Tate Pickard,2020-03-03 18:45:00,1.0,MATH90,False,
+84,Hayden Agyeman,2020-03-09 17:30:00,1.0,MATH80,False,
+85,Halle Sidor,2020-03-10 14:00:00,1.0,MATH20-2,False,
+86,Lucien Michaud,2020-03-10 16:15:00,1.0,MATH80,False,
+87,Sydney Bray,2020-03-10 17:30:00,1.0,CHEM30,False,
+89,Tate Pickard,2020-03-10 18:45:00,1.0,MATH90,False,
+90,Abby Maillot,2020-03-16 16:15:00,1.0,MATH10,False,
+91,Halle Sidor,2020-03-17 14:30:00,1.0,MATH20-2,False,
+92,Lucien Michaud,2020-03-17 16:15:00,1.0,MATH80,False,
+93,Tate Pickard,2020-03-17 18:45:00,1.0,MATH90,False,
