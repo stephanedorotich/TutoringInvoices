@@ -1,15 +1,3 @@
 # wishlist
 
-
-When a student's name is updated, the program MUST UPDATE ALL THE KEYS for that students invoices and sessions. NOPE
-Include incrementing integer key for ALL STUDENTS. This should be the new identifier
-
-Have ability to "reprint" an invoice
-
-Invoices to include new field - total
-
-Invoices to include new field - paid, unpaid, paid-in-part
-
 Have invoices save in two separate folders, paid and unpaid, have them move directories once paid.
-
-Have all Session & Invoice 'searches' go by key->index, not a linear search...

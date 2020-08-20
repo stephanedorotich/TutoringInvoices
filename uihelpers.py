@@ -4,6 +4,7 @@ import dataclasses as dataclass
 import sessions.sessionManager as xm
 import students.studentManager as sm
 import invoices.invoiceManager as im
+import payment.paymentManager as pm
 
 ###########################################################################
 # Primary purpose is to validate userinput and listen for COMMAND keys
@@ -46,6 +47,7 @@ def quit():
 	im.saveInvoices()
 	sm.saveStudents()
 	xm.saveSessions()
+	pm.savePayments()
 	sys.exit()
 
 # quitTest:

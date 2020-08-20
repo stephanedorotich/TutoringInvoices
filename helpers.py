@@ -106,6 +106,12 @@ def importDateFromString(val):
 		return date.fromisoformat(val)
 	except ValueError: raise ValueError(f'Value: \'{val}\' is not an ISO format Date (YYYY-MM-DD)')
 
+def importDateTupleFromString(val):
+	try:
+		dates = val.split(",")
+		return (date.fromisoformat(dates[0]),date.fromisoformat(dates[1]))
+	except ValueError: raise ValueError(f'Value: \'{val}\' is not an ISO format Date (YYYY-MM-DD)')
+
 def importDateTimeFromString(val):
 	"""Converts a string to a datetime, YYYY-MM-DD HH:mm:ss
 	Used when loading objects from csv files.
