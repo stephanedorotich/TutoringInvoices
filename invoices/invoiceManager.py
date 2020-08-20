@@ -3,10 +3,12 @@ import sys
 sys.path.insert(0, '../')
 import csv
 from datetime import date
+import calendar
 from .invoices import Invoice
 from sessions import sessionManager as xm
 from students import studentManager as sm
-from pdfs import pdfManager as pm
+from payment import paymentManager as pm
+from pdfs import pdfManager as pdfm
 import helpers as h
 import uihelpers as uih
 
@@ -22,10 +24,12 @@ def loadInvoices(destination = 'invoices'):
 				invoice = Invoice(
 					key = h.importIntegerFromString(row[0]),
 					student = row[1],
-					date = h.importDateFromString(row[2]),
-					billingMonth = h.importDateFromString(row[3]),
-					sessions = h.importListFromString(row[4]),
-					printed = h.importBooleanFromString(row[5]))
+					billingPeriod = h.importDateTupleFromString(row[2]),
+					sessions = h.importListFromString(row[3]),
+					payments = h.importListFromString(row[4]),
+					total = h.importFloatFromString(row[5]),
+					totalPaid = h.importFloatFromString(row[6])
+					)
 				invoices.append(invoice)
 			global invoiceKey
 			if not len(invoices) == 0:
@@ -41,7 +45,7 @@ def saveInvoices(destination = 'invoices'):
 			csv_writer.writerow(exportInvoice(invoice))
 
 def exportInvoice(i):
-	return [i.key, i.student, i.date, i.billingMonth, i.sessions, i.printed]
+	return [i.key, i.student, str(str(i.billingPeriod[0])+','+str(i.billingPeriod[1])), i.sessions, i.payments, i.total, i.totalPaid]
 
 def findInvoice(key):
 	try:
@@ -57,54 +61,40 @@ def findInvoices(keys):
 def newInvoiceUI():
 	key = createMonthlyInvoice(
 		sm.pickStudent('to generate invoice for'),
-		uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]))
+		uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)])).key
 	if not key == None:
 		printPDF(key)
 
 def generateInvoicesByMonth(students, month):
 	for student in students:
-		try:
-			createMonthlyInvoice(student, month)
-		except ValueError as e:
-			print(e)
-	global invoices
-	for invoice in invoices:
-		printPDF(invoice.key)
+		if hasSessionsToInvoiceForMonth(student, month):
+			key = createMonthlyInvoice(student, month)
+			printPDF(key)
+
+def hasSessionsToInvoiceForMonth(student, month):
+	sessions = xm.findSessions(student.sessions)
+	for session in sessions:
+		if session.invoiceKey == 0 and session.datetime.month == month:
+			return True
+	return False
 
 def createMonthlyInvoice(student, month):
+	global invoiceKey
+	invoiceKey+=1
+	global invoices
 	sessionKeys = []
-	try:
-		sessions = xm.findSessions(student.sessions)
-	except ValueError as e:
-		print(f'{student.name} has no sessions')
-		return
-	dateOfInvoice = date.today()
+	total = 0
+	year = date.today().year
+	sessions = xm.findSessions(student.sessions)
 
 	for session in sessions:
-		if session.datetime.month == month and session.datetime.year == date.today().year:
+		if session.datetime.month == month and session.datetime.year == year and session.invoiceKey == 0:
 			sessionKeys.append(session.key)
-	if not sessionKeys:
-		print(f'{student.name} has no sessions to invoice for this month')
-		return
-
-	invoice = None
-	for key in student.invoices:
-		if findInvoice(key).billingMonth.month == month:
-			invoice = findInvoice(key)
-			if not sessionKeys == invoice.sessions:
-				changeAttribute(invoice,'sessions',sessionKeys)
-				changeAttribute(invoice,'date',dateOfInvoice)
-				changeAttribute(invoice,'printed',False)
-
-	if invoice == None:
-		global invoiceKey
-		global invoices
-		invoiceKey+=1
-		invoice = Invoice(invoiceKey,student.name,dateOfInvoice,date(date.today().year, month, 1), sessionKeys)
-		invoices.append(invoice)
-
-	if not invoice.key in student.invoices:
-		student.invoices.append(invoiceKey)
+			session.invoiceKey = invoiceKey
+			total += session.rate * session.duration
+	invoice = Invoice(invoiceKey,student.name,(date(year, month, 1),date(year, month, calendar.monthrange(year, month)[1])), sessionKeys, [], total)
+	invoices.append(invoice)
+	student.invoices.append(invoiceKey)
 	return invoice.key
 
 def openRecentInvoiceUI():
@@ -112,7 +102,7 @@ def openRecentInvoiceUI():
 	if not len(student.invoices) == 0:
 		try:
 			invoice = findInvoice(student.invoices[-1])
-			pm.openPDF(invoice)
+			pdfm.openPDF(invoice)
 		except ValueError as e:
 			print(e)
 	else:
@@ -120,9 +110,7 @@ def openRecentInvoiceUI():
 
 def printPDF(key):
 	invoice = findInvoice(key)
-	if not invoice.printed:
-		pm.printPDF(invoice)
-		invoice.printed = True
+	pdfm.printPDF(invoice)
 
 def getInvoicesByStudent(student):
 	return findInvoices(student.invoices)
@@ -131,20 +119,33 @@ def payInvoiceUI():
 	student = sm.pickStudent('to pay an Invoice for')
 	invoice = findInvoice(uih.getChoice(f'Please select an invoice: {student.invoices}',student.invoices))
 	uih.printItem(invoice)
-	confirmPaid = uih.getChoice(f'Would you like to pay this invoice',uih.yn)
-	if confirmPaid == '' or confirmPaid == 'y':
-		sessions = xm.findSessions(invoice.sessions)
-		paymentType = uih.getChoice(f'Please indicate the payment type',['cash','e-transfer','cheque'])
-		for session in sessions:
-			if not session.paid:
-				session.paid = True
-				session.paymentType = paymentType
+
+	paymentAmount = uih.listener(input("Please enter the payment amount: "))
+	if (uih.doubleCheck(paymentAmount)):
+		if paymentAmount == "":
+			amount = invoice.total
+		else:
+			amount = h.importFloatFromString(paymentAmount)
+	
+	paymentType = uih.getChoice(f'Please indicate the payment type',['cash','e-transfer','cheque'])
+	while True:
+		paymentDate = uih.listener(input("Please enter the payment date: "))
+		if 'today' in paymentDate:
+			paymentDate = str(date.today())
+		if 'yesterday' in paymentDate:
+			paymentDate = date.strftime(date.today() - timedelta(1), '%Y-%m-%d')
+		try:
+			paymentDate = h.importDateFromString(paymentDate)
+			break
+		except ValueError as e:
+			print(e)
+			continue
+	newPaymentKey = pm.newPayment(paymentType, paymentDate, amount, student.name, invoice.key)
+	student.payments.append(newPaymentKey)
+	invoice.payments.append(newPaymentKey)
+	invoice.totalPaid += amount
 
 def changeAttribute(self,attributeName,newValue):
 	switch = [*Invoice.__annotations__]
-	if attributeName == switch[2]:
-		self.date = newValue
 	if attributeName == switch[4]:
 		self.sessions = newValue
-	if attributeName == switch[5]:
-		self.printed = newValue

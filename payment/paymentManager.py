@@ -33,7 +33,7 @@ def savePayments(filename = 'payments.csv'):
 		for p in payments:
 			writer.writerow([p.key, p.paymentType, p.date, p.amount, p.studentName, p.invoiceNumber])
 
-def addPayment(paymentType, paymentDate, amount, studentName, invoiceNumber) -> int:
+def newPayment(paymentType, paymentDate, amount, studentName, invoiceNumber) -> int:
 	paymentKey = len(payments)+1
 	newPayment = Payment(paymentKey,
 		paymentType,

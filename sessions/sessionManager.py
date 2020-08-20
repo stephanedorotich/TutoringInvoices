@@ -33,8 +33,9 @@ def loadSessions(filename = 'sessions.csv'):
 						datetime = h.importDateTimeFromString(row[2]),
 						duration = h.importFloatFromString(row[3]),
 						subject = row[4],
-						paid = h.importBooleanFromString(row[5]),
-						paymentType = row[6])
+						rate = h.importFloatFromString(row[5]),
+						invoiceKey = h.importIntegerFromString(row[6])
+						)
 					sessions.append(session)
 				except ValueError as e:
 					# TODO: save corrupt rows in memory so they can be saved to csv file on program close.
@@ -72,7 +73,7 @@ def exportSession(s):
 	Returns:
 		list: a list of s's attributes
 	"""
-	return [s.key, s.student, s.datetime, s.duration, s.subject, s.paid, s.paymentType]
+	return [s.key, s.student, s.datetime, s.duration, s.subject, s.rate, s.invoiceKey]
 
 def findSession(key):
 	"""Given a key, returns the Session which belongs to that key. Catches a ValueError in the case where multiple Sessions exist with the given key, or no Sessions exist with the given key.
@@ -115,7 +116,7 @@ def newSessionUI():
 
 	# INTERFACE
 	"""
-	fields = [*Session.__annotations__][1:]
+	fields = [*Session.__annotations__][1:-1]
 	session = newSession()
 	for f in fields:
 		while True:
@@ -133,20 +134,16 @@ def newSessionUI():
 					userinput = userinput.replace('today',str(date.today()))
 				if 'yesterday' in userinput:
 					userinput = userinput.replace('yesterday',date.strftime(date.today() - timedelta(1), '%Y-%m-%d'))
-			if f == 'paid':
-				if userinput == '' or userinput == 'y':
-					userinput = 'True'
-				if userinput == 'n':
-					userinput = 'False'		
-			if f == 'paymentType' and session.paid == False:
+			if f == 'rate':
+				if userinput == '':
+					userinput = student.rate	
+			if f == 'invoiceKey':
 				break
 
 			if uih.doubleCheck(userinput):
 				if f == 'duration' and userinput == '':
 					break
 				try:
-					if f == 'paymentType':
-						uih.validateChoice(userinput, ['cash','e-transfer','cheque'])
 					changeAttribute(session,f,userinput)
 					break
 				except ValueError as e:
@@ -198,9 +195,9 @@ def changeAttribute(self,attributeName,newValue):
 	elif attributeName == switch[4]:
 		self.subject = newValue.upper()
 	elif attributeName == switch[5]:
-		self.paid = h.importBooleanFromString(newValue)
+		self.rate = h.importIntegerFromString(newValue)
 	elif attributeName == switch[6]:
-		self.paymentType = newValue
+		self.invoiceKey = h.importIntegerFromString(newValue)
 
 def newSession():
 	"""Returns a new Session object with a unique Key.

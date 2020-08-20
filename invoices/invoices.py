@@ -26,9 +26,8 @@ class Invoice:
 	"""
 	key: int
 	student: str = ''
-	date: date = date.today()
-	billingMonth: date = date.today()
+	billingPeriod: date = (date.today(), date.today())
 	sessions: list = None
-	printed: bool = False
-	# TODO: attribute 'printed' can be removed by printing a pdf document upon invoice creation.
-	# >> could be changed to 'sent' instead. i.e. Have I sent the invoice?
+	payments: list = None
+	total: float = 0
+	totalPaid: float = 0

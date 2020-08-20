@@ -22,8 +22,8 @@ class Session:
 		the duration of the session, units are hours
 	subject : str
 		the subject of the session > 'MATH20' (or CHEM, PHYS, etc.)
-	paid : bool
-		if True, the session has been paid for
+	rate : int
+		the rate per hour of the session
 	paymentType : str
 		what payment method was used, > ['e-transfer', 'cash', 'cheque']
 	"""
@@ -32,5 +32,5 @@ class Session:
 	datetime: datetime = None
 	duration: float = 1.0
 	subject: str = ''
-	paid: bool = False
-	paymentType: str = ''
+	rate: int = 0
+	invoiceKey: int = 0

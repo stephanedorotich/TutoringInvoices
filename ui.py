@@ -3,8 +3,12 @@ import sys
 import sessions.sessionManager as xm
 import students.studentManager as sm
 import invoices.invoiceManager as im
+import payment.paymentManager as pm
 import uihelpers as uih
+import helpers as h
 import analyzer
+from datetime import date
+import calendar
 
 # MENUS
 def mainMenu():
@@ -73,15 +77,27 @@ def analysisMenu():
 	options = ['Total Income', 'Monthly Incomes']
 	choice = uih.menuDisplay(name, options)
 	if choice == 1:
-		analyzer.getTotalIncome(xm.sessions)
+		analyzer.getTotalIncome(pm.payments)
 	if choice == 2:
 		analyzer.getIncomeByMonth(xm.sessions)
 	mainMenu()
+
+def printParentsEmails():
+	emails = ""
+	for s in sm.students:
+		emails += s.pEmail + "; "
+	print(emails)
+
+def updateSessionInvoiceKeys():
+	for session in xm.sessions:
+		if session.datetime.month == 4:
+			session.invoiceKey = 0
 
 def run():
 	im.loadInvoices()
 	xm.loadSessions()
 	sm.loadStudents()
+	pm.loadPayments()
 	isRunning = True
 	while isRunning:
 		try:

@@ -37,7 +37,8 @@ def loadStudents(filename = 'students.csv'):
 						pAddress = row[6],
 						rate = h.importIntegerFromString(row[7]),
 						invoices = h.importListFromString(row[8]),
-						sessions = h.importListFromString(row[9]))
+						sessions = h.importListFromString(row[9]),
+						payments = h.importListFromString(row[10]))
 					students.append(student)
 				except ValueError as e:
 					print(f'Error in line {csv_reader.line_num} of {filename}\n')
@@ -68,7 +69,7 @@ def exportStudent(s):
 	Returns:
 		list: a list of s's attributes
 	"""	
-	return [s.name, s.sPhoneNum, s.sEmail, s.pName, s.pPhoneNum, s.pEmail, s.pAddress, s.rate, s.invoices, s.sessions]
+	return [s.name, s.sPhoneNum, s.sEmail, s.pName, s.pPhoneNum, s.pEmail, s.pAddress, s.rate, s.invoices, s.sessions, s.payments]
 
 def findStudent(name):
 	"""Given a name (str) search query, returns the corresponding Student. Raises a ValueError if the search query is not at least the length of the MINIMUM_SEARCH_QUERY_LENGTH
@@ -125,6 +126,7 @@ STUDENT GENERATED SUCCESSFULLY
 	x = uih.getChoice('Would you like to save this Student?',uih.yn)
 	student.invoices = []
 	student.sessions = []
+	student.payments = []
 	if x == 'y' or x == '':
 		students.append(student)
 		print("Student saved...\n")

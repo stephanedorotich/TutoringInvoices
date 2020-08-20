@@ -2,20 +2,26 @@
 import sessions.sessionManager as xm
 import students.studentManager as sm
 import invoices.invoiceManager as im
+import payment.paymentManager as pm
 import uihelpers as uih
 import calendar
 
-def getTotalIncome(sessions):
-	totalPaid = 0
-	totalUnpaid = 0
-	for session in sessions:
-		if session.paid:
-			totalPaid += session.duration * sm.findStudent(session.student).rate
-		else:
-			totalUnpaid += session.duration * sm.findStudent(session.student).rate
+def getTotalIncome(payments):
+	totalCash = 0
+	totalEtransfer = 0
+	totalCheque = 0
+	for payment in payments:
+		if payment.paymentType == 'cash':
+			totalCash += payment.amount
+		if payment.paymentType == 'e-transfer':
+			totalEtransfer += payment.amount
+		if payment.paymentType == 'cheque':
+			totalCheque += payment.amount
 
-	print(f'\nTotal Income: {totalPaid}')
-	print(f'Total Unpaid: {totalUnpaid}')
+	print(f'\nTotal cash: {totalCash}')
+	print(f'Total e-transfer: {totalEtransfer}')
+	print(f'Total cheque: {totalCheque}')
+	print(f'\nGrand Total: {totalCash + totalEtransfer + totalCheque}')
 
 def getIncomeByMonth(sessions):
 	print()
@@ -27,7 +33,7 @@ def getIncomeByMonth(sessions):
 			monthlyIncomes[year] = {}
 		if not month in monthlyIncomes[year]:
 			monthlyIncomes[year][month] = [0,0]
-		monthlyIncomes[year][month][0] += session.duration * sm.findStudent(session.student).rate
+		monthlyIncomes[year][month][0] += session.duration * session.rate
 		monthlyIncomes[year][month][1]+=1
 	for year in [*monthlyIncomes]:
 		print(year)

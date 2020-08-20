@@ -24,10 +24,7 @@ def openPDF(invoice):
 def printPDF(invoice):
 	student = sm.findStudent(invoice.student)
 	sessions = xm.findSessions(invoice.sessions)
-	invoiceNumber = ''
-	for _ in range(4-len(str(invoice.key))):
-		invoiceNumber+='0'
-	invoiceNumber+=str(invoice.key)
+	invoiceNumber = getInvNum(invoice.key)
 	filename = f'TutoringInvoice{invoiceNumber}-{student.name.split(" ")[0]}'
 
 	header = r'''\documentclass{invoice}
@@ -39,11 +36,12 @@ def printPDF(invoice):
 {\Large\sc Tutoring}
 \end{center}
 \bigskip
+Invoice Number: INVOICENUMBER
 \hrule
 Stéphane Dorotich \hfill 587-434-7693 \\
 10 West Beynon Rise, Cochrane, AB \hfill stephanedorotich@gmail.com \\
 
-{\large \sc Invoice To:} \hfill {\sc Date:} INVOICEDATE\\
+{\large \sc Invoice To:} \hfill {\sc Billing Period:} INVOICEDATE\\
 NAME PHONENUM EMAIL ADDRESS'''
 	header = fillHeader(header, student, invoice)
 
@@ -75,9 +73,11 @@ def fillHeader(header,student,invoice):
 	PHONENUM = student.pPhoneNum
 	EMAIL = student.pEmail
 	ADDRESS = student.pAddress
+	INVOICENUMBER = getInvNum(invoice.key)
 
 	temp = r'''\tab NAME \\'''
 	header = header.replace("NAME",temp.replace("NAME",NAME))
+	header = header.replace("INVOICENUMBER", f'{INVOICENUMBER}')
 
 	if not len(PHONENUM) == 0:
 		temp = r'''\tab PHONENUM \\'''
@@ -100,7 +100,7 @@ def fillHeader(header,student,invoice):
 	else:
 		header = header.replace("ADDRESS",'')
 
-	header = header.replace("INVOICEDATE",str(invoice.date))
+	header = header.replace("INVOICEDATE",str(str(invoice.billingPeriod[0]) + " to " + str(invoice.billingPeriod[1])))
 	return header
 
 def fillMain(student,sessions):
@@ -113,7 +113,7 @@ SESSIONS
 	main = main.replace('''STUDENTNAME''',f'{student.name}')
 	body = ''''''
 	for session in sessions:
-		RATE = student.rate
+		RATE = session.rate
 		DATE = session.datetime
 		DURATION = session.duration
 		line = f'''\\hourrow{{{DATE}}}{{{DURATION}}}{{{RATE}}}

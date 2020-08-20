@@ -42,3 +42,4 @@ class Student:
 	rate: int = 0
 	invoices: list = None
 	sessions: list = None
+	payments: list = None
