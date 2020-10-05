@@ -32,13 +32,13 @@ def printPDF(invoice):
 \def \tab {\hspace*{3ex}}
 \begin {document}
 \begin{center}
-{\huge\sc Stéphane Dorotich}\\
+{\huge\sc St\'ephane Dorotich}\\
 {\Large\sc Tutoring}
 \end{center}
 \bigskip
 Invoice Number: INVOICENUMBER
 \hrule
-Stéphane Dorotich \hfill 587-434-7693 \\
+St\'ephane Dorotich \hfill 587-434-7693 \\
 10 West Beynon Rise, Cochrane, AB \hfill stephanedorotich@gmail.com \\
 
 {\large \sc Invoice To:} \hfill {\sc Billing Period:} INVOICEDATE\\
