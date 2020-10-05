@@ -68,8 +68,12 @@ def newInvoiceUI():
 def generateInvoicesByMonth(students, month):
 	for student in students:
 		if hasSessionsToInvoiceForMonth(student, month):
-			key = createMonthlyInvoice(student, month)
-			printPDF(key)
+			createMonthlyInvoice(student, month)
+
+def printInvoicesByMonth(month):
+	for invoice in invoices:
+		if invoice.billingPeriod[0].month == month:
+			pdfm.printPDF(invoice)
 
 def hasSessionsToInvoiceForMonth(student, month):
 	sessions = xm.findSessions(student.sessions)
@@ -107,10 +111,6 @@ def openRecentInvoiceUI():
 			print(e)
 	else:
 		raise ValueError('This student has no invoices')
-
-def printPDF(key):
-	invoice = findInvoice(key)
-	pdfm.printPDF(invoice)
 
 def getInvoicesByStudent(student):
 	return findInvoices(student.invoices)

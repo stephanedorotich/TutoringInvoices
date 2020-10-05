@@ -52,7 +52,7 @@ def sessionMenu():
 
 def invoiceMenu():
 	name = "INVOICE MENU"
-	options = ['Open PDF','View All', 'View by Student','Create Invoice','Generate Invoices','Pay Invoice']
+	options = ['Open PDF','View All', 'View by Student','Create Invoice','Generate Invoices by Month','Print Invoices by Month','Pay Invoice']
 	choice = uih.menuDisplay(name, options)
 	if choice == 1:
 		try:
@@ -69,6 +69,8 @@ def invoiceMenu():
 		im.generateInvoicesByMonth(sm.students,
 			uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]))
 	if choice == 6:
+		im.printInvoicesByMonth(uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]))
+	if choice == 7:
 		im.payInvoiceUI()
 	mainMenu()
 
@@ -82,6 +84,8 @@ def analysisMenu():
 		analyzer.getIncomeByMonth(xm.sessions)
 	mainMenu()
 
+
+# not accessible in program.
 def printParentsEmails():
 	emails = ""
 	for s in sm.students:
@@ -90,8 +94,9 @@ def printParentsEmails():
 
 def updateSessionInvoiceKeys():
 	for session in xm.sessions:
-		if session.datetime.month == 4:
+		if session.datetime.month == 6:
 			session.invoiceKey = 0
+
 
 def run():
 	im.loadInvoices()
