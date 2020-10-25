@@ -52,7 +52,8 @@ def sessionMenu():
 
 def invoiceMenu():
 	name = "INVOICE MENU"
-	options = ['Open PDF','View All', 'View by Student','Create Invoice','Generate Invoices by Month','Print Invoices by Month','Pay Invoice']
+	options = ['Open PDF','View All', 'View by Student','Create Invoice by Student',
+				'Print Invoice by Student','Generate Invoices by Month','Print Invoices by Month','Pay Invoice']
 	choice = uih.menuDisplay(name, options)
 	if choice == 1:
 		try:
@@ -66,11 +67,14 @@ def invoiceMenu():
 	if choice == 4:
 		im.newInvoiceUI()
 	if choice == 5:
+		im.printInvoiceByStudent(sm.pickStudent("to print the invoice of"),
+				uih.getChoice("What month is the invoice for?", [n+1 for n in range(12)]))
+	if choice == 6:
 		im.generateInvoicesByMonth(sm.students,
 			uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]))
-	if choice == 6:
-		im.printInvoicesByMonth(uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]))
 	if choice == 7:
+		im.printInvoicesByMonth(uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]))
+	if choice == 8:
 		im.payInvoiceUI()
 	mainMenu()
 
