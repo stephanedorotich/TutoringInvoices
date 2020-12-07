@@ -71,9 +71,11 @@ def invoiceMenu():
 				uih.getChoice("What month is the invoice for?", [n+1 for n in range(12)]))
 	if choice == 6:
 		im.generateInvoicesByMonth(sm.students,
-			uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]))
+			uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]),
+			uih.getChoice("What year would you like to invoice for?", [n+1 for n in range(2019,2099)]))
 	if choice == 7:
-		im.printInvoicesByMonth(uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]))
+		im.printInvoicesByMonth(uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]),
+			uih.getChoice("What year would you like to invoice for?", [n+1 for n in range(2019,2099)]))
 	if choice == 8:
 		im.payInvoiceUI()
 	mainMenu()

@@ -69,30 +69,29 @@ def printInvoiceByStudent(student, month):
 		if (i.billingPeriod[0].month == month) & (i.billingPeriod[0].year == date.today().year):
 			pdfm.printPDF(i)
 
-def generateInvoicesByMonth(students, month):
+def generateInvoicesByMonth(students, month, year):
 	for student in students:
-		if hasSessionsToInvoiceForMonth(student, month):
-			createMonthlyInvoice(student, month)
+		if hasSessionsToInvoiceForMonth(student, month, year):
+			createMonthlyInvoice(student, month, year)
 
-def printInvoicesByMonth(month):
+def printInvoicesByMonth(month, year):
 	for invoice in invoices:
-		if invoice.billingPeriod[0].month == month:
+		if invoice.billingPeriod[0].month == month and invoice.billingPeriod[0].year == year:
 			pdfm.printPDF(invoice)
 
-def hasSessionsToInvoiceForMonth(student, month):
+def hasSessionsToInvoiceForMonth(student, month, year):
 	sessions = xm.findSessions(student.sessions)
 	for session in sessions:
-		if session.invoiceKey == 0 and session.datetime.month == month:
+		if session.invoiceKey == 0 and session.datetime.month == month and session.datetime.year == year:
 			return True
 	return False
 
-def createMonthlyInvoice(student, month):
+def createMonthlyInvoice(student, month, year):
 	global invoiceKey
 	invoiceKey+=1
 	global invoices
 	sessionKeys = []
 	total = 0
-	year = date.today().year
 	sessions = xm.findSessions(student.sessions)
 
 	for session in sessions:
