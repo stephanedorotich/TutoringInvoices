@@ -61,7 +61,8 @@ def findInvoices(keys):
 def newInvoiceUI():
 	createMonthlyInvoice(
 		sm.pickStudent('to generate invoice for'),
-		uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]))
+		uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]),
+		uih.getChoice("What year would you like to invoice for?", [n+1 for n in range(2019,2099)]))
 
 def printInvoiceByStudent(student, month):
 	invoices = getInvoicesByStudent(student)
