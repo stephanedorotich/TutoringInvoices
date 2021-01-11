@@ -1,3 +1,0 @@
-# wishlist
-
-Have invoices save in two separate folders, paid and unpaid, have them move directories once paid.
