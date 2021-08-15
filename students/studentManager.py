@@ -71,6 +71,21 @@ def exportStudent(s):
 	"""	
 	return [s.name, s.sPhoneNum, s.sEmail, s.pName, s.pPhoneNum, s.pEmail, s.pAddress, s.rate, s.invoices, s.sessions, s.payments]
 
+def printEmailList():
+	i = 0;
+	print("Student Email List:")
+	for s in students:
+		if not s.sEmail == "":
+			i+=1
+			print(f'{s.sEmail}; ', end = '')
+
+	print("\nParent Email List:")
+	for s in students:
+		if not s.pEmail == "":
+			i+=1
+			print(f'{s.pEmail}; ', end = '')
+	print(f'\n\n{i} emails on file')
+
 def findStudent(name):
 	"""Given a name (str) search query, returns the corresponding Student. Raises a ValueError if the search query is not at least the length of the MINIMUM_SEARCH_QUERY_LENGTH
 
