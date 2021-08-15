@@ -26,7 +26,7 @@ def mainMenu():
 
 def studentMenu():
 	name = "STUDENT MENU"
-	options = ['Add New','View All','View Student','Edit']
+	options = ['Add New','View All','View Student','Edit', 'Print Email List']
 	choice = uih.menuDisplay(name, options)
 	if choice == 1:
 		sm.newStudentUI()
@@ -36,6 +36,8 @@ def studentMenu():
 		sm.viewStudentUI()
 	if choice == 4:
 		sm.editStudentUI()
+	if choice == 5:
+		sm.printEmailList()
 	mainMenu()
 
 def sessionMenu():

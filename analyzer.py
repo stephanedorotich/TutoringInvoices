@@ -26,6 +26,7 @@ def getTotalIncome(payments):
 def getIncomeByMonth(sessions):
 	print()
 	monthlyIncomes = {}
+	yearlyIncomes = {}
 	for session in sessions:
 		month = session.datetime.month
 		year = session.datetime.year
@@ -33,9 +34,14 @@ def getIncomeByMonth(sessions):
 			monthlyIncomes[year] = {}
 		if not month in monthlyIncomes[year]:
 			monthlyIncomes[year][month] = [0,0]
+		if not year in yearlyIncomes:
+			yearlyIncomes[year] = [0,0]
+		yearlyIncomes[year][0] += session.duration * session.rate
+		yearlyIncomes[year][1] +=1
 		monthlyIncomes[year][month][0] += session.duration * session.rate
 		monthlyIncomes[year][month][1]+=1
 	for year in [*monthlyIncomes]:
 		print(year)
 		for month in [*monthlyIncomes[year]]:
-			print(f'\t{calendar.month_abbr[month]}: {monthlyIncomes[year][month]}')
+			print(f'\t{calendar.month_abbr[month]}:\t{monthlyIncomes[year][month]}')
+		print(f'Total:\t\t{yearlyIncomes[year]}\n')
