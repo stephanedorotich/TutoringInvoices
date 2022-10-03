@@ -103,17 +103,6 @@ def createMonthlyInvoice(student, month, year):
 	student.invoices.append(invoiceKey)
 	return invoice.key
 
-def openRecentInvoiceUI():
-	student = sm.pickStudent("to open the most recent invoice of")
-	if not len(student.invoices) == 0:
-		try:
-			invoice = findInvoice(student.invoices[-1])
-			pdfm.openPDF(invoice)
-		except ValueError as e:
-			print(e)
-	else:
-		raise ValueError('This student has no invoices')
-
 def getInvoicesByStudent(student):
 	return findInvoices(student.invoices)
 

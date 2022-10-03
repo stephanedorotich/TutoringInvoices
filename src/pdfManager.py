@@ -16,10 +16,6 @@ def getInvNum(invKey):
 	invNum+=str(invKey)
 	return invNum
 
-def openPDF(invoice):
-	filename = getFileName(getInvNum(invoice.key),invoice.student)
-	os.system(f'open pdfs/{filename}.pdf')
-
 def printPDF(invoice):
 	student = sm.findStudent(invoice.student)
 	sessions = xm.findSessions(invoice.sessions)

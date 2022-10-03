@@ -70,21 +70,6 @@ def exportStudent(s):
 	"""	
 	return [s.name, s.sPhoneNum, s.sEmail, s.pName, s.pPhoneNum, s.pEmail, s.pAddress, s.rate, s.invoices, s.sessions, s.payments]
 
-def printEmailList():
-	i = 0;
-	print("Student Email List:")
-	for s in students:
-		if not s.sEmail == "":
-			i+=1
-			print(f'{s.sEmail}; ', end = '')
-
-	print("\nParent Email List:")
-	for s in students:
-		if not s.pEmail == "":
-			i+=1
-			print(f'{s.pEmail}; ', end = '')
-	print(f'\n\n{i} emails on file')
-
 def findStudent(name):
 	"""Given a name (str) search query, returns the corresponding Student. Raises a ValueError if the search query is not at least the length of the MINIMUM_SEARCH_QUERY_LENGTH
 
@@ -144,59 +129,6 @@ STUDENT GENERATED SUCCESSFULLY
 	if x == 'y' or x == '':
 		students.append(student)
 		print("Student saved...\n")
-
-def editStudentUI():
-	"""Guides the user through the editing of a Student
-
-	1. Prompts the user to pick a student 'to edit'
-
-	2. Prompts the user to input a value for any attribute they wish to edit.
-
-	3. Displays the edits proposed by the user, and asks the user to confirm that they would like to save these edits. If YES, all the Student's attributes are updated to the new values. If NO, no changes are saved.
-
-	# INTERFACE
-	"""
-	fields = [*Student.__annotations__][:-2]
-	# last 2 fields of Student are omited so user cannot edit 'sessions' or 'invoices'
-	student = pickStudent("to edit")
-	edits = []
-	for f in fields:
-		while True:
-			userinput = uih.listener(input(f'Please enter their {f}: '))
-			if uih.doubleCheck(userinput):
-				#### TODO WARNING! delete's field without double checking
-				#### should get moved below.
-				if userinput == 'delete':
-					try:
-						changeAttribute(student,f,'')
-						break
-					except ValueError as e:
-						print(e)
-				elif not userinput == '':
-					try:
-						edits.append((f,userinput))
-						break
-					except ValueError as e:
-						print(e)
-				break
-			else:
-				continue
-#### TODO	
-#### CAN DO SOME WORK HERE. MAKE THE PRINT STATEMENT MORE
-#### INFORMATIVE
-	print("EDITS:")
-	for edit in edits:
-		print(f'\t{edit[0]}: {edit[1]}')
-	choice = uih.getChoice('Would you like to save these edits?',uih.yn)
-	if choice == 'y' or choice == '':
-		for edit in edits:
-			changeAttribute(student,edit[0],edit[1])
-		print('''
-*******************************
-  STUDENT EDITED SUCCESSFULLY
-*******************************''')
-		uih.printItem(student)
-		print('*******************************\n*******************************\n')
 
 def pickStudent(op):
 	"""Prompts the user to select a Student on which to perform the given operation (op).
