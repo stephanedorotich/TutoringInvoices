@@ -4,7 +4,6 @@ import os,glob,subprocess,shutil
 import invoiceManager as im
 import sessionManager as xm
 import studentManager as sm
-import uihelpers as uih
 
 def getFileName(invNum, studentName):
 	return f'TutoringInvoice{invNum}-{studentName.split(" ")[0]}'

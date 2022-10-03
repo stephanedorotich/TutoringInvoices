@@ -9,7 +9,7 @@ import studentManager as sm
 import paymentManager as pm
 import pdfManager as pdfm
 import helpers as h
-import uihelpers as uih
+import ui
 
 invoiceKey = 0
 invoices = []
@@ -59,8 +59,8 @@ def findInvoices(keys):
 def newInvoiceUI():
 	createMonthlyInvoice(
 		sm.pickStudent('to generate invoice for'),
-		uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]),
-		uih.getChoice("What year would you like to invoice for?", [n+1 for n in range(2019,2099)]))
+		ui.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]),
+		ui.getChoice("What year would you like to invoice for?", [n+1 for n in range(2019,2099)]))
 
 def printInvoiceByStudent(student, month, year):
 	invoices = getInvoicesByStudent(student)
@@ -108,19 +108,19 @@ def getInvoicesByStudent(student):
 
 def payInvoiceUI():
 	student = sm.pickStudent('to pay an Invoice for')
-	invoice = findInvoice(uih.getChoice(f'Please select an invoice: {student.invoices}',student.invoices))
-	uih.printItem(invoice)
+	invoice = findInvoice(ui.getChoice(f'Please select an invoice: {student.invoices}',student.invoices))
+	ui.printItem(invoice)
 
-	paymentAmount = uih.listener(input("Please enter the payment amount: "))
-	if (uih.doubleCheck(paymentAmount)):
+	paymentAmount = ui.get_input("Please enter the payment amount: ")
+	if (ui.doubleCheck(paymentAmount)):
 		if paymentAmount == "":
 			amount = invoice.total
 		else:
 			amount = h.importFloatFromString(paymentAmount)
 
-	paymentType = uih.getChoice(f'Please indicate the payment type',['cash','e-transfer','cheque'])
+	paymentType = ui.getChoice(f'Please indicate the payment type',['cash','e-transfer','cheque'])
 	while True:
-		paymentDate = uih.listener(input("Please enter the payment date: "))
+		paymentDate = ui.get_input("Please enter the payment date: ")
 		if 'today' in paymentDate:
 			paymentDate = str(date.today())
 		if 'yesterday' in paymentDate:
