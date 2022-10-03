@@ -5,10 +5,7 @@ import students.studentManager as sm
 import invoices.invoiceManager as im
 import payment.paymentManager as pm
 import uihelpers as uih
-import helpers as h
 import analyzer
-from datetime import date
-import calendar
 
 # MENUS
 def mainMenu():
@@ -70,7 +67,8 @@ def invoiceMenu():
 		im.newInvoiceUI()
 	if choice == 5:
 		im.printInvoiceByStudent(sm.pickStudent("to print the invoice of"),
-				uih.getChoice("What month is the invoice for?", [n+1 for n in range(12)]))
+			uih.getChoice("What month is the invoice for?", [n+1 for n in range(12)]),
+			uih.getChoice("What year would you like to invoice for?", [n+1 for n in range(2019,2099)]))
 	if choice == 6:
 		im.generateInvoicesByMonth(sm.students,
 			uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]),
@@ -89,28 +87,20 @@ def analysisMenu():
 	if choice == 1:
 		analyzer.getTotalIncome(pm.payments)
 	if choice == 2:
-		analyzer.getIncomeByMonth(xm.sessions)
+		analyzer.getIncomeByMonth(xm.sessions, im.invoices)
 	mainMenu()
 
-
-# not accessible in program.
-def printParentsEmails():
-	emails = ""
-	for s in sm.students:
-		emails += s.pEmail + "; "
-	print(emails)
-
-def updateSessionInvoiceKeys():
-	for session in xm.sessions:
-		if session.datetime.month == 6:
-			session.invoiceKey = 0
-
-
-def run():
-	im.loadInvoices()
-	xm.loadSessions()
-	sm.loadStudents()
-	pm.loadPayments()
+def run(recoveryMode = False):
+	if recoveryMode:
+		im.recoveryLoadInvoices()
+		xm.recoveryLoadSessions()
+		sm.recoveryLoadStudents()
+		pm.recoverLoadPayments()
+	else:
+		im.loadInvoices()
+		xm.loadSessions()
+		sm.loadStudents()
+		pm.loadPayments()
 	isRunning = True
 	while isRunning:
 		try:
@@ -118,4 +108,6 @@ def run():
 		except StopIteration as e:
 			continue
 
-run()
+if __name__ == "__main__":
+	if len(sys.argv) == 1:
+		run()
