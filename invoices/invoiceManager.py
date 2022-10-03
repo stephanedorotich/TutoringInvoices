@@ -21,16 +21,17 @@ def loadInvoices(destination = 'invoices'):
 		with open(filename, 'r') as csv_file:
 			csv_reader = csv.reader(csv_file,delimiter=',',quotechar='"')
 			for row in csv_reader:
-				invoice = Invoice(
-					key = h.importIntegerFromString(row[0]),
-					student = row[1],
-					billingPeriod = h.importDateTupleFromString(row[2]),
-					sessions = h.importListFromString(row[3]),
-					payments = h.importListFromString(row[4]),
-					total = h.importFloatFromString(row[5]),
-					totalPaid = h.importFloatFromString(row[6])
-					)
-				invoices.append(invoice)
+				if len(row) != 0:
+					invoice = Invoice(
+						key = h.importIntegerFromString(row[0]),
+						student = row[1],
+						billingPeriod = h.importDateTupleFromString(row[2]),
+						sessions = h.importListFromString(row[3]),
+						payments = h.importListFromString(row[4]),
+						total = h.importFloatFromString(row[5]),
+						totalPaid = h.importFloatFromString(row[6])
+						)
+					invoices.append(invoice)
 			global invoiceKey
 			if not len(invoices) == 0:
 				invoiceKey = invoices[-1].key
@@ -64,10 +65,10 @@ def newInvoiceUI():
 		uih.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]),
 		uih.getChoice("What year would you like to invoice for?", [n+1 for n in range(2019,2099)]))
 
-def printInvoiceByStudent(student, month):
+def printInvoiceByStudent(student, month, year):
 	invoices = getInvoicesByStudent(student)
 	for i in invoices:
-		if (i.billingPeriod[0].month == month) & (i.billingPeriod[0].year == date.today().year):
+		if (i.billingPeriod[0].month == month) & (i.billingPeriod[0].year == year):
 			pdfm.printPDF(i)
 
 def generateInvoicesByMonth(students, month, year):

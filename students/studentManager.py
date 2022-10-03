@@ -5,7 +5,6 @@ import csv
 from .students import Student
 import helpers as h
 import uihelpers as uih
-import copy
 
 students = []
 
@@ -26,23 +25,24 @@ def loadStudents(filename = 'students.csv'):
 		with open(filename, 'r') as csv_file:
 			csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
 			for row in csv_reader:
-				try:
-					student = Student(
-						name = row[0],
-						sPhoneNum = row[1],
-						sEmail = row[2],
-						pName = row[3],
-						pPhoneNum = row[4],
-						pEmail = row[5],
-						pAddress = row[6],
-						rate = h.importIntegerFromString(row[7]),
-						invoices = h.importListFromString(row[8]),
-						sessions = h.importListFromString(row[9]),
-						payments = h.importListFromString(row[10]))
-					students.append(student)
-				except ValueError as e:
-					print(f'Error in line {csv_reader.line_num} of {filename}\n')
-					raise e
+				if len(row) != 0:
+					try:
+						student = Student(
+							name = row[0],
+							sPhoneNum = row[1],
+							sEmail = row[2],
+							pName = row[3],
+							pPhoneNum = row[4],
+							pEmail = row[5],
+							pAddress = row[6],
+							rate = h.importIntegerFromString(row[7]),
+							invoices = h.importListFromString(row[8]),
+							sessions = h.importListFromString(row[9]),
+							payments = h.importListFromString(row[10]))
+						students.append(student)
+					except ValueError as e:
+						print(f'Error in line {csv_reader.line_num} of {filename}\n')
+						raise e
 	except FileNotFoundError:
 		print(f'File({filename}) does not exist')
 

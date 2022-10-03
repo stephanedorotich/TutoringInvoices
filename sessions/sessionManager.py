@@ -26,23 +26,22 @@ def loadSessions(filename = 'sessions.csv'):
 		with open(filename, 'r') as csv_file:
 			csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
 			for row in csv_reader:
-				try:
-					session = Session(
-						key = h.importIntegerFromString(row[0]),
-						student = row[1],
-						datetime = h.importDateTimeFromString(row[2]),
-						duration = h.importFloatFromString(row[3]),
-						subject = row[4],
-						rate = h.importFloatFromString(row[5]),
-						invoiceKey = h.importIntegerFromString(row[6])
-						)
-					sessions.append(session)
-				except ValueError as e:
-					# TODO: save corrupt rows in memory so they can be saved to csv file on program close.
-					# OR: prompt user to correct corrupt data.
-					print(f'Error in line {csv_reader.line_num} of {filename}')
-					print(row)
-					print(e)
+				if len(row) != 0:
+					try:
+						session = Session(
+							key = h.importIntegerFromString(row[0]),
+							student = row[1],
+							datetime = h.importDateTimeFromString(row[2]),
+							duration = h.importFloatFromString(row[3]),
+							subject = row[4],
+							rate = h.importFloatFromString(row[5]),
+							invoiceKey = h.importIntegerFromString(row[6])
+							)
+						sessions.append(session)
+					except ValueError as e:
+						print(f'Error in line {csv_reader.line_num} of {filename}')
+						print(row)
+						print(e)
 			global sessionKey
 			if not len(sessions) == 0:
 				sessionKey = sessions[-1].key
