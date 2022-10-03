@@ -1,7 +1,6 @@
 # sessions.py
 from dataclasses import dataclass
 from datetime import datetime
-import helpers as h
 
 @dataclass
 class Session:
@@ -24,8 +23,8 @@ class Session:
 		the subject of the session > 'MATH20' (or CHEM, PHYS, etc.)
 	rate : int
 		the rate per hour of the session
-	paymentType : str
-		what payment method was used, > ['e-transfer', 'cash', 'cheque']
+	invoice key : int
+		what invoice this session belongs to (0 indicates none)
 	"""
 	key: int
 	student: str = ''
