@@ -5,7 +5,7 @@ from datetime import datetime, date, timedelta
 import Session
 import studentManager as sm
 import helpers as h
-import uihelpers as uih
+import ui
 
 sessionKey = 0
 sessions = []
@@ -118,7 +118,7 @@ def newSessionUI():
 	session = newSession()
 	for f in fields:
 		while True:
-			userinput = uih.listener(input(f'Please enter the {f}: '))
+			userinput = ui.get_inpute(f'Please enter the {f}: ')
 
 			if f == 'student':
 				try:
@@ -138,7 +138,7 @@ def newSessionUI():
 			if f == 'invoiceKey':
 				break
 
-			if uih.doubleCheck(userinput):
+			if ui.doubleCheck(userinput):
 				if f == 'duration' and userinput == '':
 					break
 				try:
@@ -152,9 +152,9 @@ def newSessionUI():
 ******************************
 SESSION GENERATED SUCCESSFULLY
 ******************************''')
-	uih.printItem(session)
+	ui.printItem(session)
 	print('******************************\n')
-	choice = uih.getChoice('Would you like to save this Session?',uih.yn)
+	choice = ui.getChoice('Would you like to save this Session?',ui.yn)
 	if choice == 'y' or choice == '':
 		sessions.append(session)
 		sm.addSessionKey(student,session.key)
@@ -163,7 +163,7 @@ SESSION GENERATED SUCCESSFULLY
 		global sessionKey
 		sessionKey-=1
 		session = None
-	choice = uih.getChoice('Would you like to input another Session?', uih.yn)
+	choice = ui.getChoice('Would you like to input another Session?', ui.yn)
 	if choice == 'y' or choice == '':
 		newSessionUI()
 

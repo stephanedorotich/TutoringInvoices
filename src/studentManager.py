@@ -3,7 +3,7 @@ import sys
 import csv
 import Student
 import helpers as h
-import uihelpers as uih
+import ui
 
 students = []
 
@@ -92,7 +92,7 @@ def findStudent(name):
 		return results[0]
 	else:
 		print(f'There are multiple students who match the query: {name}')
-		return results[uih.menuDisplay(None,[s.name for s in results])-1]
+		return results[ui.menuDisplay(None,[s.name for s in results])-1]
 
 def newStudentUI():
 	"""Guides the user through the creation of a new Student object
@@ -107,8 +107,8 @@ def newStudentUI():
 	student = Student()
 	for f in fields:
 		while True:
-			userinput = uih.listener(input(f'Please enter their {f}: '))
-			if uih.doubleCheck(userinput):
+			userinput = ui.get_input(f'Please enter their {f}: ')
+			if ui.doubleCheck(userinput):
 				try:
 					changeAttribute(student,f,userinput)
 					break
@@ -120,9 +120,9 @@ def newStudentUI():
 ******************************
 STUDENT GENERATED SUCCESSFULLY
 ******************************''')
-	uih.printItem(student)
+	ui.printItem(student)
 	print('******************************\n******************************\n')
-	x = uih.getChoice('Would you like to save this Student?',uih.yn)
+	x = ui.getChoice('Would you like to save this Student?',ui.yn)
 	student.invoices = []
 	student.sessions = []
 	student.payments = []
@@ -142,13 +142,13 @@ def pickStudent(op):
 	# INTERFACE
 	"""
 	while True:
-		userInput = uih.listener(input(f'Which Student would you like {op}? '))
+		userInput = ui.get_input(f'Which Student would you like {op}? ')
 		try:
 			student = findStudent(userInput)
 		except ValueError as e:
 			print(e)
 			continue
-		if uih.doubleCheck(student.name):
+		if ui.doubleCheck(student.name):
 			return student	
 
 def viewStudentUI():
@@ -161,7 +161,7 @@ def viewStudentUI():
 	# INTERFACE
 	"""
 	student = pickStudent("to view")
-	uih.printItem(student)
+	ui.printItem(student)
 
 def addSessionKey(student,key):
 	"""Adds the given Session Key to the given Student's Session Keys
