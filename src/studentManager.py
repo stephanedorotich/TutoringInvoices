@@ -1,14 +1,13 @@
 # studentManager.py
 import sys
-sys.path.insert(0, '../')
 import csv
-from .students import Student
+import Student
 import helpers as h
 import uihelpers as uih
 
 students = []
 
-def loadStudents(filename = 'students.csv'):
+def loadStudents(filename = 'data/students.csv'):
 	"""Reads the csv file and generates a list of Student objects
 
 	For every row in the csv file, generate a Student object with the attributes specified in the row and append it to the 'students' list
@@ -27,7 +26,7 @@ def loadStudents(filename = 'students.csv'):
 			for row in csv_reader:
 				if len(row) != 0:
 					try:
-						student = Student(
+						student = Student.Student(
 							name = row[0],
 							sPhoneNum = row[1],
 							sEmail = row[2],
@@ -46,7 +45,7 @@ def loadStudents(filename = 'students.csv'):
 	except FileNotFoundError:
 		print(f'File({filename}) does not exist')
 
-def saveStudents(filename = 'students.csv'):
+def saveStudents(filename = 'data/students.csv'):
 	"""Saves all Student objects in students to a csv file with given filename
 
 	Args:

@@ -1,17 +1,16 @@
 # sessionManager.py
 import sys
-sys.path.insert(0, '../')
 import csv
 from datetime import datetime, date, timedelta
-from .sessions import Session
-from students import studentManager as sm
+import Session
+import studentManager as sm
 import helpers as h
 import uihelpers as uih
 
 sessionKey = 0
 sessions = []
 
-def loadSessions(filename = 'sessions.csv'):
+def loadSessions(filename = 'data/sessions.csv'):
 	"""Reads the csv file and generates a list of Session objects
 
 	For every row in the csv file, generate a Session object with the attributes specified in the row and appends it to the 'sessions' list
@@ -28,7 +27,7 @@ def loadSessions(filename = 'sessions.csv'):
 			for row in csv_reader:
 				if len(row) != 0:
 					try:
-						session = Session(
+						session = Session.Session(
 							key = h.importIntegerFromString(row[0]),
 							student = row[1],
 							datetime = h.importDateTimeFromString(row[2]),
@@ -49,7 +48,7 @@ def loadSessions(filename = 'sessions.csv'):
 		print(f'File({filename}) does not exist')
 
 
-def saveSessions(filename = 'sessions.csv'):
+def saveSessions(filename = 'data/	sessions.csv'):
 	"""Saves all Session objects in sessions to a csv file with given filename
 
 	Args:

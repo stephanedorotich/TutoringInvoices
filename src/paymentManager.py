@@ -1,20 +1,19 @@
 import sys
-sys.path.insert(0, '../')
 import csv
-from .payment import Payment
+import Payment
 import helpers as h
 
 payments = []
 validPaymentTypes = ['e-transfer', 'cash', 'cheque']
 
-def loadPayments(filename = 'payments.csv'):
+def loadPayments(filename = 'data/payments.csv'):
 	try:
 		with open(filename, 'r') as csv_file:
 			csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
 			for row in csv_reader:
 				if len(row) != 0:
 					try:
-						payment = Payment(
+						payment = Payment.Payment(
 							key = h.importIntegerFromString(row[0]),
 							paymentType = row[1],
 							date = h.importDateFromString(row[2]),
@@ -28,7 +27,7 @@ def loadPayments(filename = 'payments.csv'):
 	except FileNotFoundError:
 		print(f'File({filename}) does not exist')
 
-def savePayments(filename = 'payments.csv'):
+def savePayments(filename = 'data/payments.csv'):
 	with open(filename, 'w') as csv_file:
 		writer = csv.writer(csv_file, delimiter=',', quotechar = '"', quoting =csv.QUOTE_MINIMAL)
 		for p in payments:

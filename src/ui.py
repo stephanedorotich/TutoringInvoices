@@ -1,9 +1,9 @@
 # ui.py
-import sys
-import sessions.sessionManager as xm
-import students.studentManager as sm
-import invoices.invoiceManager as im
-import payment.paymentManager as pm
+import sys, os
+import sessionManager as xm
+import studentManager as sm
+import invoiceManager as im
+import paymentManager as pm
 import uihelpers as uih
 import analyzer
 
@@ -91,6 +91,10 @@ def analysisMenu():
 	mainMenu()
 
 def run(recoveryMode = False):
+	if not os.path.isdir("data"):
+		os.mkdir("data")
+	if not os.path.isdir("pdfs"):
+		os.mkdir("pdfs")
 	if recoveryMode:
 		im.recoveryLoadInvoices()
 		xm.recoveryLoadSessions()

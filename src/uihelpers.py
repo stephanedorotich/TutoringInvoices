@@ -1,10 +1,10 @@
 # uihelpers.py
 import sys
 import dataclasses as dataclass
-import sessions.sessionManager as xm
-import students.studentManager as sm
-import invoices.invoiceManager as im
-import payment.paymentManager as pm
+import sessionManager as xm
+import studentManager as sm
+import invoiceManager as im
+import paymentManager as pm
 
 ###########################################################################
 # Primary purpose is to validate userinput and listen for COMMAND keys

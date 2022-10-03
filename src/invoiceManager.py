@@ -1,28 +1,26 @@
 # invoiceManager.py
 import sys
-sys.path.insert(0, '../')
 import csv
 from datetime import date
 import calendar
-from .invoices import Invoice
-from sessions import sessionManager as xm
-from students import studentManager as sm
-from payment import paymentManager as pm
-from pdfs import pdfManager as pdfm
+import Invoice
+import sessionManager as xm
+import studentManager as sm
+import paymentManager as pm
+import pdfManager as pdfm
 import helpers as h
 import uihelpers as uih
 
 invoiceKey = 0
 invoices = []
 
-def loadInvoices(destination = 'invoices'):
-	filename = f'{destination}.csv'
+def loadInvoices(filename = 'data/invoices.csv'):
 	try:
 		with open(filename, 'r') as csv_file:
 			csv_reader = csv.reader(csv_file,delimiter=',',quotechar='"')
 			for row in csv_reader:
 				if len(row) != 0:
-					invoice = Invoice(
+					invoice = Invoice.Invoice(
 						key = h.importIntegerFromString(row[0]),
 						student = row[1],
 						billingPeriod = h.importDateTupleFromString(row[2]),
@@ -38,8 +36,7 @@ def loadInvoices(destination = 'invoices'):
 	except FileNotFoundError:
 		print(f'File({filename}) does not exist')
 
-def saveInvoices(destination = 'invoices'):
-	filename = f'{destination}.csv'
+def saveInvoices(filename = 'data/invoices.csv'):
 	with open(filename, 'w') as csv_file:
 		csv_writer = csv.writer(csv_file,delimiter=',',quotechar='"',quoting=csv.QUOTE_MINIMAL)
 		for invoice in invoices:
@@ -101,7 +98,7 @@ def createMonthlyInvoice(student, month, year):
 			sessionKeys.append(session.key)
 			session.invoiceKey = invoiceKey
 			total += session.rate * session.duration
-	invoice = Invoice(invoiceKey,student.name,(date(year, month, 1),date(year, month, calendar.monthrange(year, month)[1])), sessionKeys, [], total)
+	invoice = Invoice.Invoice(invoiceKey,student.name,(date(year, month, 1),date(year, month, calendar.monthrange(year, month)[1])), sessionKeys, [], total)
 	invoices.append(invoice)
 	student.invoices.append(invoiceKey)
 	return invoice.key
@@ -131,7 +128,7 @@ def payInvoiceUI():
 			amount = invoice.total
 		else:
 			amount = h.importFloatFromString(paymentAmount)
-	
+
 	paymentType = uih.getChoice(f'Please indicate the payment type',['cash','e-transfer','cheque'])
 	while True:
 		paymentDate = uih.listener(input("Please enter the payment date: "))
