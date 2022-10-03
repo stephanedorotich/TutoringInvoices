@@ -1,9 +1,4 @@
 # analyzer.py
-import sessions.sessionManager as xm
-import students.studentManager as sm
-import invoices.invoiceManager as im
-import payment.paymentManager as pm
-import uihelpers as uih
 import calendar
 
 def getTotalIncome(payments):
@@ -23,7 +18,7 @@ def getTotalIncome(payments):
 	print(f'Total cheque: {totalCheque}')
 	print(f'\nGrand Total: {totalCash + totalEtransfer + totalCheque}')
 
-def getIncomeByMonth(sessions):
+def getIncomeByMonth(sessions,invoices):
 	print()
 	monthlyIncomes = {}
 	yearlyIncomes = {}
@@ -33,13 +28,20 @@ def getIncomeByMonth(sessions):
 		if not year in monthlyIncomes:
 			monthlyIncomes[year] = {}
 		if not month in monthlyIncomes[year]:
-			monthlyIncomes[year][month] = [0,0]
+			monthlyIncomes[year][month] = [0,0,0,0]
 		if not year in yearlyIncomes:
-			yearlyIncomes[year] = [0,0]
+			yearlyIncomes[year] = [0,0,0,0]
 		yearlyIncomes[year][0] += session.duration * session.rate
-		yearlyIncomes[year][1] +=1
+		yearlyIncomes[year][2] += session.duration
+		yearlyIncomes[year][3] += 1
 		monthlyIncomes[year][month][0] += session.duration * session.rate
-		monthlyIncomes[year][month][1]+=1
+		monthlyIncomes[year][month][2] += session.duration
+		monthlyIncomes[year][month][3] += 1
+	for invoice in invoices:
+		month = invoice.billingPeriod[0].month
+		year = invoice.billingPeriod[0].year
+		yearlyIncomes[year][1] += invoice.totalPaid
+		monthlyIncomes[year][month][1] += invoice.totalPaid
 	for year in [*monthlyIncomes]:
 		print(year)
 		for month in [*monthlyIncomes[year]]:
