@@ -1,10 +1,9 @@
 # invoicePDFGenerator.py
 import sys
-sys.path.insert(0, '../')
 import os,glob,subprocess,shutil
-from invoices import invoiceManager as im
-from sessions import sessionManager as xm
-from students import studentManager as sm
+import invoiceManager as im
+import sessionManager as xm
+import studentManager as sm
 import uihelpers as uih
 
 def getFileName(invNum, studentName):
