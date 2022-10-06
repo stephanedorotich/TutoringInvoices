@@ -38,7 +38,6 @@ def studentMenu():
 		printItems(sm.students)
 	if choice == 3:
 		sm.viewStudentUI()
-	mainMenu()
 
 def sessionMenu():
 	name = "SESSION MENU"
@@ -50,7 +49,6 @@ def sessionMenu():
 		printItems(xm.sessions)
 	if choice == 3:
 		printItems(xm.getSessionsByStudent(sm.pickStudent("to view the sessions of")))
-	mainMenu()
 
 def invoiceMenu():
 	name = "INVOICE MENU"
@@ -76,7 +74,6 @@ def invoiceMenu():
 			getChoice("What year would you like to invoice for?", [n+1 for n in range(2019,2099)]))
 	if choice == 7:
 		im.payInvoiceUI()
-	mainMenu()
 
 def analysisMenu():
 	name = "ANALYSIS MENU"
@@ -86,8 +83,6 @@ def analysisMenu():
 		analyzer.getTotalIncome(pm.payments)
 	if choice == 2:
 		analyzer.getIncomeByMonth(xm.sessions, im.invoices)
-	mainMenu()
-
 
 # listener:
 # listends for COMMAND keys
