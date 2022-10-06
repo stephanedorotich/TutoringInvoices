@@ -118,7 +118,7 @@ def newSessionUI():
 	session = newSession()
 	for f in fields:
 		while True:
-			userinput = ui.get_inpute(f'Please enter the {f}: ')
+			userinput = ui.get_input(f'Please enter the {f}: ')
 
 			if f == 'student':
 				try:
