@@ -1,75 +1,116 @@
-# TutoringInvoices
+---
+author: Stéphane Dorotich
+title: Assignment 1 - Refactoring
+date: Oct 7th, 2022
+---
 
-*****THIS PROGRAM IS UNDER CONSTRUCTION*****
+# Code Source
 
+The original code can be found [here](https://github.com/stephanedorotich/TutoringInvoices). I started developing the program in 2019 to help me track my high school tutoring business.
 
-Description:
-This program keeps track of STUDENTS, SESSIONS, and INVOICES for my tutoring business
-Given a month, it will automatically populate an invoice for a student and generate a pdf invoice for each student.
+The program provides a UI that helps me manage my Students, Sessions, and Invoices and also allows me to automatically generate monthly PDF invoices to send to my clients.
 
-Notes to User:
-- Inputing 'TEST' at any point will enter a test mode, whereupon inputing 'Q' will
-result in the program quitting WITHOUT SAVING ANY CHANGES.
-- Each of the Student, Session, and Invoice Menu have a 'View All' option. This is an
-easy way to verify any changes you made to objects or any new objects you create.
-- Presently, when generating the invoice pdf, any paid session will pass a 'RATE' of 0$/hr so that it doesn't get added to the total amount owing. This is not the desired functionality, but a consequence of the invoice template that I'm using not being able to record a downpayment on the invoice.
+# Usage
 
-To Run: >> python ui.py
-- Typing 'python ui.py' in Terminal or Command Prompt will launch the User Interface
-- Inputing 'Q' at any point will quit the program
-	quit() quits the program and saves all STUDENTS, SESSIONS, and INVOICES
-	to their respective csv files.
-- Inputing 'TEST' at any point will set the var isTest = True (found in uihelpers.py)
-	if isTest == True, then the 'Q' command calls quitTest()
-	which quits the program without saving any changes.
+```python3 src/ui.py```
+
+# Commits
+
+| Refactor | Commit Message | Short Hash |
+| -------- | -------------- |:-----------:|
+| 1 | Refactor 1: Dead Code | 11b36dbd |
+| 2 | Refactor 2: Feature Envy | 8768859f |
 
 
-File Descriptions:
-'students.csv', 'sessions.csv', invoices.csv' are the save files for the program
+# Refactor 1
 
-'ui.py' 	runs the User Interface that guides a user through the program
-'uihelpers.py' 	helps elicit and validate userInput, it also listens to userInput
-		for COMMAND keys and executes the exit() and exitTest() functions.
+## Code Smell: Dead Code
 
-'invoices/invoices.py' 		is the data class file that defines an INVOICE
-'sessions/sessions.py' 		is the data class file that defines a SESSION
-'students/students.py' 		is the data class file that defines a STUDENT
+I developed a variety of utilities for my program. Over years of continued use, these utilities were seldom used. The code was reachable and functional, but not needed.
 
-'invoices/invoiceManager.py' 	loads, TODO modifies, generates, TODO deletes, and saves invoices
-'sessions/sessionManager.py' 	loads, TODO modifies, generates, TODO deletes, and saves sessions
-'students/studentManager.py' 	loads, modifies, generates, TODO deletes, and saves students
-'pdfs/pdfManager.py' 		writes a pdf for a given invoice, uses LaTeX
+Some truly "dead" code was located in the `run()`, pertaining to `recoveryMode` whose purpose was to safely load my `.csv` files in the event that I accidentally ran the program from Command Prompt which would insert additional newline characters to my `.csv` files and be an absolute headache to fix manually. I later updated the regular `loadX()` methods to handle this case, rendering the `recoveryMode` section "dead".
 
+## Solution: Delete Code
 
-TODO:
-- need to write missing documentation
-	studentManager
-	sessionManager
-	invoiceManager
-	pdfManager
+The methods for these utilities were all removed. The menus from which these utilities were invoked were updated accordingly.
 
-	analyzer
-	helpers
-	uihelpers
-	ui
-- store corrupt row from csv load in virtual memory, and save it in place
-- OR prompt user to correct error in corrupt row.
-- need to modify sm.editStudent() to have a better print statement to display changes.
-- need to find a new invoice template so I can handle 'paid' sessions more effectively
-- need to implement DELETE functions for sessions (maybe for students & invoices also)
-- Functionality for combo sessions????
-- sessionManager -> getStudentSessions(student: Student): return a list of a student's sessions
-- sessionManager -> getMonthSessions(month: int): return a list of sessions for the given month
-- Implement a BACKUP function that saves all my data to a diff location...
-- Currently, if two students share a name, my minimum_search_query_length is forced to be quite large (annoying to deal with). Alternatively, I can nix the minimum_search_query_length entirely, and instead build functionality so if a single search query yields multiple results, user is prompted to PICK ONE.
-- Implement a user class
-- need to implement ability to edit sessions
+The following files and methods were affected.
+- `invoiceManager.py`
+    - Removed: `openRecentInvoiceUI()`
+- `pdfManager.py`
+    - Removed: `openPDF()`
+- `studentManager.py`
+    - Removed: `printEmailList()`
+    - Removed: `editStudentUI()`
+- `ui.py`
+    - Updated: `studentMenu()`
+    - Updated: `invoiceMenu()`
+    - Updated: `run()`
 
+## Resulting Code
 
+No new code was added.
+
+## Testing
+
+No testing was done because the removed methods/code were only invoked from a single location in `ui.py` and so the functionality of my program was unaffected by their removal.
+
+## Justification
+
+Removing the `recoveryMode` section prevents potential **runtime errors**. The section invoked methods that no longer existed, which would cause a runtime error.
+
+Removing `editStudentUI()` helps ensure the integrity of my Student data entries. The ability to edit was a big risk because the method allowed me to modify the `Session` list whose integrity is paramount to integrity of the program.
+
+Removing `openRecentInvoiceUI()` reduced some coupling between `invoiceManager.py` and `pdfManager.py`. The pdfManager file now **exclusively** deals with generating PDFs and has no UI methods.
 
 
-NOTES TO SELF:
-1.Include A README file that contains
-	- A brief description of the project
-	- Installation instructions
-	- A short example/tutorial
+# Refactor 2
+
+## Code Smell: Feature Envy 
+
+## Solution:
+
+## Resulting Code
+
+## Testing
+
+## Justification
+
+
+# Refactor 3
+
+## Code Smell: 
+
+## Solution:
+
+## Resulting Code
+
+## Testing
+
+## Justification
+
+
+# Refactor 4
+
+## Code Smell: 
+
+## Solution:
+
+## Resulting Code
+
+## Testing
+
+## Justification
+
+
+# Refactor 5
+
+## Code Smell: 
+
+## Solution:
+
+## Resulting Code
+
+## Testing
+
+## Justification
