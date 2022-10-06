@@ -7,8 +7,12 @@ import invoiceManager as im
 import paymentManager as pm
 import analyzer
 
+isRunning = True
 isTest = False
 yn = ['y','n','']
+
+class RenewStateException(Exception):
+	pass
 
 # MENUS
 def mainMenu():
@@ -94,17 +98,16 @@ def analysisMenu():
 # If not userinput = 'Q' or 'TEST' returns userinput to calling function.
 # >> case sensitive
 def listener(userinput):
-	global isTest
 	if userinput == 'Q':
-		if isTest:
-			quitTest()
-		else:
-			quit()
+		global isRunning
+		isRunning = False
+		raise RenewStateException
 	elif userinput == 'TEST':
+		global isTest
 		isTest = True
-		raise StopIteration
+		raise RenewStateException
 	elif userinput == 'MAIN':
-		raise StopIteration
+		raise RenewStateException
 	else:
 		return userinput
 
@@ -220,12 +223,19 @@ def run():
 	xm.loadSessions()
 	sm.loadStudents()
 	pm.loadPayments()
-	isRunning = True
+	global isRunning
+	global isTest
 	while isRunning:
 		try:
 			mainMenu()
-		except StopIteration as e:
-			continue
+		except RenewStateException as e:
+			if isRunning == True:
+				continue
+			else:
+				break
+	if isTest:
+		quitTest()
+	quit()
 
 if __name__ == "__main__":
 	if len(sys.argv) == 1:
