@@ -79,8 +79,8 @@ def insert_new_session(
 		) -> Session.Session:
 	# Create session
 	sessionKey = len(sessions)+1
-	session = Session.Session(sessionKey, student.name, time, duration, subjection, rate, 0)
-	sessions.append(sesssion)
+	session = Session.Session(sessionKey, student.name, time, duration, subject, rate, 0)
+	sessions.append(session)
 	student.sessions.append(sessionKey)
 	return session
 
