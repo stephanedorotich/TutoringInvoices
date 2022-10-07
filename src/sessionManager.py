@@ -1,12 +1,9 @@
 # sessionManager.py
-import sys
 import csv
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
 import Session
 import Student
-import studentManager as sm
 import helpers as h
-import ui
 
 sessions = []
 
