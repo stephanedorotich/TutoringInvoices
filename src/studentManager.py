@@ -94,7 +94,7 @@ def ui_new_student():
 		while True:
 			if f == "rate":
 				res[f] = ui.get_integer_input("Please enter their rate")
-			elif:
+			else:
 				res[f] = ui.get_input(f'Please enter their {f}: ')
 			if ui.doubleCheck(res[f]):
 				break
