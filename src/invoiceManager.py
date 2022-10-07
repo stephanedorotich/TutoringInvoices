@@ -56,12 +56,6 @@ def findInvoices(keys):
 	results = h.findMultiple(invoices,keys)
 	return results
 
-def newInvoiceUI():
-	createMonthlyInvoice(
-		sm.ui_pick_student(),
-		ui.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]),
-		ui.getChoice("What year would you like to invoice for?", [n+1 for n in range(2019,2099)]))
-
 def printInvoiceByStudent(student, month, year):
 	invoices = getInvoicesByStudent(student)
 	for i in invoices:
@@ -70,8 +64,8 @@ def printInvoiceByStudent(student, month, year):
 
 def generateInvoicesByMonth(students, month, year):
 	for student in students:
-		if hasSessionsToInvoiceForMonth(student, month, year):
-			createMonthlyInvoice(student, month, year)
+		if not insert_new_invoice(student, month, year) == -1:
+			print(f"Made invoice for {student.name}")
 
 def printInvoicesByMonth(month, year):
 	for invoice in invoices:
@@ -85,7 +79,9 @@ def hasSessionsToInvoiceForMonth(student, month, year):
 			return True
 	return False
 
-def createMonthlyInvoice(student, month, year):
+def insert_new_invoice(student, month, year):
+	if not hasSessionsToInvoiceForMonth(student, month, year):
+		return -1
 	global invoiceKey
 	invoiceKey+=1
 	global invoices
@@ -105,38 +101,3 @@ def createMonthlyInvoice(student, month, year):
 
 def getInvoicesByStudent(student):
 	return findInvoices(student.invoices)
-
-def payInvoiceUI():
-	student = sm.ui_pick_student()
-	invoice = findInvoice(ui.getChoice(f'Please select an invoice: {student.invoices}',student.invoices))
-	ui.printItem(invoice)
-
-	paymentAmount = ui.get_input("Please enter the payment amount: ")
-	if (ui.doubleCheck(paymentAmount)):
-		if paymentAmount == "":
-			amount = invoice.total
-		else:
-			amount = h.importFloatFromString(paymentAmount)
-
-	paymentType = ui.getChoice(f'Please indicate the payment type',['cash','e-transfer','cheque'])
-	while True:
-		paymentDate = ui.get_input("Please enter the payment date: ")
-		if 'today' in paymentDate:
-			paymentDate = str(date.today())
-		if 'yesterday' in paymentDate:
-			paymentDate = date.strftime(date.today() - timedelta(1), '%Y-%m-%d')
-		try:
-			paymentDate = h.importDateFromString(paymentDate)
-			break
-		except ValueError as e:
-			print(e)
-			continue
-	newPaymentKey = pm.newPayment(paymentType, paymentDate, amount, student.name, invoice.key)
-	student.payments.append(newPaymentKey)
-	invoice.payments.append(newPaymentKey)
-	invoice.totalPaid += amount
-
-def changeAttribute(self,attributeName,newValue):
-	switch = [*Invoice.__annotations__]
-	if attributeName == switch[4]:
-		self.sessions = newValue

@@ -35,7 +35,7 @@ def savePayments(filename = 'data/payments.csv'):
 
 def newPayment(paymentType, paymentDate, amount, studentName, invoiceNumber) -> int:
 	paymentKey = len(payments)+1
-	newPayment = Payment(paymentKey,
+	newPayment = Payment.Payment(paymentKey,
 		paymentType,
 		paymentDate,
 		amount,

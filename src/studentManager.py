@@ -79,5 +79,13 @@ def insert_new_student(
 	student.invoices = []
 	student.sessions = []
 	student.payments = []
+	global students
 	students.append(student)
 	return student
+
+def findStudent(name):
+	try:
+		result = h.findSingle(students,name)
+		return result
+	except ValueError as e:
+		print(e)

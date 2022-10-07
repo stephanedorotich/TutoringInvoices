@@ -48,7 +48,7 @@ def loadSessions(filename = 'data/sessions.csv'):
 		print(f'File({filename}) does not exist')
 
 
-def saveSessions(filename = 'data/	sessions.csv'):
+def saveSessions(filename = 'data/sessions.csv'):
 	"""Saves all Session objects in sessions to a csv file with given filename
 
 	Args:
