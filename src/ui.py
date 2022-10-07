@@ -1,6 +1,5 @@
 # ui.py
 import sys, os
-import dataclasses as dataclass
 import sessionManager as xm
 import studentManager as sm
 import invoiceManager as im
@@ -42,11 +41,11 @@ def sessionMenu():
 	options = ['Add New','View All', 'View by Student']
 	choice = use.menuDisplay(name, options)
 	if choice == 1:
-		xm.ui_new_session()
+		uop.new_session()
 	if choice == 2:
-		printItems(xm.sessions)
+		uop.view_all_sessions()
 	if choice == 3:
-		printItems(xm.getSessionsByStudent(sm.ui_pick_student()))
+		uop.view_sessions_by_student()
 
 def invoiceMenu():
 	name = "INVOICE MENU"

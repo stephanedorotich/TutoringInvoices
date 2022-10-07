@@ -1,5 +1,7 @@
 import ui_service as use
+import helpers as h
 import studentManager as sm
+import sessionManager as xm
 from Student import Student
 
 # ==================================== #
@@ -60,7 +62,37 @@ def view_single_student():
 
 # ==================================== #
 #||         Session Services
+def new_session():
+	"""
+	Prompts the user to input a Student's details
+	Validates each input.
+	"""
+	student = pick_student()
+	time = use.get_datetime_input("Please enter the datetime: ")
+	duration = use.get_float_input("Please enter the duration: ")
+	subject = use.get_input("Please enter the subject: ").upper()
+	rate = use.get_integer_input("Please enter their rate: (0 for default)")
+	if rate == 0:
+		rate = student.rate
+	session = xm.insert_new_session(student, time, duration, subject, rate)
+	print("******************************")
+	print("      NEW SESSION ADDED       ")
+	print("******************************")
+	use.printItem(session)
+	print("******************************")
 
+def findSessions(keys):
+	try:
+		results = h.findMultiple(xm.sessions,keys)
+		return results
+	except ValueError as e:
+		print(e)
+
+def view_all_sessions():
+    use.printItems(xm.sessions)
+
+def view_sessions_by_student():
+	use.printItems(findSessions(pick_student().sessions))
 # ==================================== #
 
 
