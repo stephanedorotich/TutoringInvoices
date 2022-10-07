@@ -2,32 +2,31 @@ import ui_service as use
 import helpers as h
 import studentManager as sm
 import sessionManager as xm
+import invoiceManager as im
+import paymentManager as pm
 from Student import Student
 
 # ==================================== #
 #||         Student Services
 def new_student():
-	"""
+    """
 	Prompts the user to input a Student's details
 	Validates that an integer was entered for rate, the rest are strings.
 	"""
-	fields = [*Student.__annotations__][:-3]
-	res = {}
-
-	for f in fields:
-		while True:
-			if f == "rate":
-				res[f] = use.get_integer_input("Please enter their rate")
-			else:
-				res[f] = use.get_input(f'Please enter their {f}: ')
-			if use.doubleCheck(res[f]):
-				break
-	student = sm.insert_new_student(res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7])
-	print("******************************")
-	print("      NEW STUDENT ADDED       ")
-	print("******************************")
-	use.printItem(student)
-	print("******************************")
+    name = use.get_input("Please enter their name: ")
+    sPhoneNum = use.get_input('Please enter their phone number: ')
+    sEmail = use.get_input('Please enter their email: ')
+    pName = use.get_input("Please enter their parent's name: ")
+    pPhone = use.get_input("Please enter their parent's phone number: ")
+    pEmail = use.get_input("Please enter their parent's email: ")
+    pAddress = use.get_input("Please enter their address: ")
+    rate = use.get_integer_input("Please entier their rate: ")
+    student = sm.insert_new_student(name, sPhoneNum, sEmail, pName, pPhone, pEmail, pAddress, rate)
+    print("******************************")
+    print("      NEW STUDENT ADDED       ")
+    print("******************************")
+    use.printItem(student)
+    print("******************************")
 
 def pick_student():
 	"""
@@ -71,7 +70,7 @@ def new_session():
 	time = use.get_datetime_input("Please enter the datetime: ")
 	duration = use.get_float_input("Please enter the duration: ")
 	subject = use.get_input("Please enter the subject: ").upper()
-	rate = use.get_integer_input("Please enter their rate: (0 for default)")
+	rate = use.get_integer_input("Please enter their rate: ")
 	if rate == 0:
 		rate = student.rate
 	session = xm.insert_new_session(student, time, duration, subject, rate)
@@ -81,23 +80,77 @@ def new_session():
 	use.printItem(session)
 	print("******************************")
 
-def findSessions(keys):
-	try:
-		results = h.findMultiple(xm.sessions,keys)
-		return results
-	except ValueError as e:
-		print(e)
-
 def view_all_sessions():
     use.printItems(xm.sessions)
 
 def view_sessions_by_student():
-	use.printItems(findSessions(pick_student().sessions))
+	use.printItems(xm.findSessions(pick_student().sessions))
 # ==================================== #
 
 
 
 # ==================================== #
 #||         Invoice Services
+def new_invoice_for_student():
+    student = pick_student()
+    month = use.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)])
+    year = use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)])
+    if im.insert_new_invoice(student, month, year) == -1:
+        print(f"\n{student.name} has no sessions for {year}-{month}")
 
+def view_all_invoices():
+    printItems(im.invoices)
+
+def view_invoices_by_student():
+	use.printItems(im.getInvoicesByStudent(pick_student()))
+
+def generate_monthly_invoices():
+    im.generateInvoicesByMonth(sm.students,
+		use.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]),
+		use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)]))
+	
+def print_student_invoice():
+    im.printInvoiceByStudent(pick_student(),
+		use.getChoice("What month is the invoice for?", [n+1 for n in range(12)]),
+		use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)]))
+
+def print_monthly_invoices():
+    im.printInvoicesByMonth(
+        use.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]),
+		use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)]))
+
+def pay_invoice():
+    student = pick_student()
+    invoice = im.findInvoice(use.getChoice(f'Please select an invoice: {student.invoices}',student.invoices))
+    use.printItem(invoice)
+
+    paymentAmount = use.get_float_input("Please enter the payment amount: ")
+    paymentType = use.getChoice(f'Please enter the payment type: ',['cash','e-transfer','cheque'])
+    paymentDate = use.get_date_input("Please enter the payment date: ")
+
+    newPaymentKey = pm.newPayment(paymentType, paymentDate, paymentAmount, student.name, invoice.key)
+    student.payments.append(newPaymentKey)
+    invoice.payments.append(newPaymentKey)
+    invoice.totalPaid += paymentAmount
+# ==================================== #
+
+
+# ==================================== #
+#||         Data Services
+
+def load():
+	if not os.path.isdir("data"):
+		os.mkdir("data")
+	if not os.path.isdir("pdfs"):
+		os.mkdir("pdfs")
+	im.loadInvoices()
+	xm.loadSessions()
+	sm.loadStudents()
+	pm.loadPayments()
+
+def save():
+	im.saveInvoices()
+	sm.saveStudents()
+	xm.saveSessions()
+	pm.savePayments()
 # ==================================== #

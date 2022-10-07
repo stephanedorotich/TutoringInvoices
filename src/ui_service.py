@@ -1,6 +1,7 @@
 import dataclasses as dataclass
-import datetime as datetime
+from datetime import datetime, date
 import exceptions as ex
+import helpers as h
 
 # ==================================== #
 #||          Input Services
@@ -23,6 +24,14 @@ def get_integer_input(prompt : str) -> int:
             print(e)
             continue
 
+def get_date_input(prompt : str) -> date:
+    while True:
+        try:
+            return h.importDateFromString(get_input(prompt))
+        except ValueError as e:
+            print(e)
+            continue
+
 def get_datetime_input(prompt : str) -> datetime:
     while True:
         try:
@@ -34,21 +43,21 @@ def get_datetime_input(prompt : str) -> datetime:
 def get_float_input(prompt : str) -> float:
     while True:
         try:
-            return h.importDateTimeFromString(get_input(prompt))
+            return h.importFloatFromString(get_input(prompt))
         except ValueError as e:
             print(e)
             continue
 
 def validateChoice(userinput,choices):
-    for choice in choices:
-        try:
-            if userinput.lower() in choice:
-                return choice.lower()
-        except TypeError:
-            if int(userinput) == choice:
-                return choice
-    else:
-        raise ValueError(f'\"{userinput}\" is not one of the options: {choices}\n')
+    if userinput.lower() in choices:
+        return userinput.lower()
+    try:
+        n = int(userinput)
+        if n in choices:
+            return n
+    except ValueError:
+        pass
+    raise ValueError(f'\"{userinput}\" is not one of the options: {choices}\n')
 
 def getChoice(query,choices):
     prompt = f'{query} >> '
