@@ -87,17 +87,15 @@ def ui_new_student():
 	Prompts the user to input a Student's details
 	Validates that an integer was entered for rate, the rest are strings.
 	"""
-	fields = [*Student.__annotations__][:-3] # All but sessions, invoices, payments
+	fields = [*Student.Student.__annotations__][:-3]
 	res = {}
+
 	for f in fields:
 		while True:
-			res[f] = ui.get_input(f'Please enter their {f}: ')
 			if f == "rate":
-				try:
-					res[f] = h.importIntegerFromString(res[f])
-				except ValueError as e:
-					print(e)
-					continue
+				res[f] = ui.get_integer_input("Please enter their rate")
+			elif:
+				res[f] = ui.get_input(f'Please enter their {f}: ')
 			if ui.doubleCheck(res[f]):
 				break
 	student = insert_new_student(res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7])

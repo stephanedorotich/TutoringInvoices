@@ -44,7 +44,7 @@ def sessionMenu():
 	options = ['Add New','View All', 'View by Student']
 	choice = menuDisplay(name, options)
 	if choice == 1:
-		xm.newSessionUI()
+		xm.ui_new_session()
 	if choice == 2:
 		printItems(xm.sessions)
 	if choice == 3:
@@ -108,6 +108,30 @@ def listener(userinput):
 
 def get_input(prompt : str) -> str:
 	return listener(input(prompt))
+
+def get_integer_input(prompt : str) -> int:
+	while True:
+		try:
+			return h.importIntegerFromString(get_input(prompt))
+		except ValueError as e:
+			print(e)
+			continue
+
+def get_datetime_input(prompt : str) -> datetime:
+	while True:
+		try:
+			return h.importDateTimeFromString(get_input(prompt))
+		except ValueError as e:
+			print(e)
+			continue
+
+def get_float_input(prompt : str) -> float:
+	while True:
+		try:
+			return h.importDateTimeFromString(get_input(prompt))
+		except ValueError as e:
+			print(e)
+			continue
 
 # quit:
 # called when user inputs Q
