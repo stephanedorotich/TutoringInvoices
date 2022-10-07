@@ -3,11 +3,11 @@ import sys
 import csv
 from datetime import datetime, date, timedelta
 import Session
+import Student
 import studentManager as sm
 import helpers as h
 import ui
 
-sessionKey = 0
 sessions = []
 
 def loadSessions(filename = 'data/sessions.csv'):
@@ -73,6 +73,17 @@ def exportSession(s):
 	"""
 	return [s.key, s.student, s.datetime, s.duration, s.subject, s.rate, s.invoiceKey]
 
+def insert_new_session(
+		student : Student.Student, time : datetime,
+		duration : float, subject : str, rate: int
+		) -> Session.Session:
+	# Create session
+	sessionKey = len(sessions)+1
+	session = Session.Session(sessionKey, student.name, time, duration, subjection, rate, 0)
+	sessions.append(sesssion)
+	student.sessions.append(sessionKey)
+	return session
+
 def findSession(key):
 	"""Given a key, returns the Session which belongs to that key. Catches a ValueError in the case where multiple Sessions exist with the given key, or no Sessions exist with the given key.
 
@@ -103,69 +114,24 @@ def findSessions(keys):
 	except ValueError as e:
 		print(e)
 
-def newSessionUI():
-	"""Guides the user through the creation of a new Session object.
-
-	1. Prompts the user to input values for each of a Session's attributes. These values are validated and the Session's attributes are set to them.
-
-	2. Displays the created Session and asks the user if they want to save the Session. If YES, this Session's Key is added to the Student's Session Keys, and this Session is appended to the 'sessions' list to be saved when the program quits. If NO, this Session is set to None, the global sessionKey is decremented.
-
-	3. The user is asked if they would like to input another Session. If YES, this method recurs.
-
-	# INTERFACE
+def ui_new_session():
 	"""
-	fields = [*Session.__annotations__][1:-1]
-	session = newSession()
-	for f in fields:
-		while True:
-			userinput = ui.get_input(f'Please enter the {f}: ')
-
-			if f == 'student':
-				try:
-					student = sm.findStudent(userinput)
-					userinput = student.name
-				except ValueError as e:
-					print(e)
-					continue
-			if f == 'datetime':
-				if 'today' in userinput:
-					userinput = userinput.replace('today',str(date.today()))
-				if 'yesterday' in userinput:
-					userinput = userinput.replace('yesterday',date.strftime(date.today() - timedelta(1), '%Y-%m-%d'))
-			if f == 'rate':
-				if userinput == '':
-					userinput = student.rate	
-			if f == 'invoiceKey':
-				break
-
-			if ui.doubleCheck(userinput):
-				if f == 'duration' and userinput == '':
-					break
-				try:
-					changeAttribute(session,f,userinput)
-					break
-				except ValueError as e:
-					print(e)
-					continue
-			else: continue
-	print('''
-******************************
-SESSION GENERATED SUCCESSFULLY
-******************************''')
+	Prompts the user to input a Student's details
+	Validates each input.
+	"""
+	student = sm.ui_pick_student()
+	time = ui.get_datetime_input("Please enter the datetime: ")
+	duration = ui.get_float_input("Please enter the duration: ")
+	subject = ui.get_input("Please enter the subject: ").upper()
+	rate = ui.get_integer_input("Please enter their rate: (0 for default)")
+	if rate == 0:
+		rate = student.rate
+	session = insert_new_session(student, time, duration, subject, rate)
+	print("******************************")
+	print("      NEW SESSION ADDED       ")
+	print("******************************")
 	ui.printItem(session)
-	print('******************************\n')
-	choice = ui.getChoice('Would you like to save this Session?',ui.yn)
-	if choice == 'y' or choice == '':
-		sessions.append(session)
-		sm.addSessionKey(student,session.key)
-		print("Session saved...")
-	if choice == 'n':
-		global sessionKey
-		sessionKey-=1
-		session = None
-	choice = ui.getChoice('Would you like to input another Session?', ui.yn)
-	if choice == 'y' or choice == '':
-		newSessionUI()
+	print("******************************")
 
 def getSessionsByStudent(student):
 	"""Prompts the user to select a student that they would like to view the sessions of. Returns a list of the sessions belonging to that student.
@@ -174,37 +140,3 @@ def getSessionsByStudent(student):
 		list (Session): A list of sessions belonging to the student selected
 	"""
 	return findSessions(student.sessions)
-
-def changeAttribute(self,attributeName,newValue):
-	"""Given a Session and attributeName, sets the value of that attribute to the new Value.
-
-	Args:
-		self (Session): A session to be modify
-		attributeName (str): The name of the attribute to modify
-		newValue (str): The new value to set the attribute to
-	"""
-	switch = [*Session.__annotations__]
-	if attributeName == switch[1]:
-		self.student = newValue
-	elif attributeName == switch[2]:
-		self.datetime = h.importDateTimeFromString(newValue)
-	elif attributeName == switch[3]:
-		self.duration = h.importFloatFromString(newValue)
-	elif attributeName == switch[4]:
-		self.subject = newValue.upper()
-	elif attributeName == switch[5]:
-		self.rate = h.importIntegerFromString(newValue)
-	elif attributeName == switch[6]:
-		self.invoiceKey = h.importIntegerFromString(newValue)
-
-def newSession():
-	"""Returns a new Session object with a unique Key.
-
-	Returns:
-		Session: a new Session object, all attributes are set to default values except for the Key which is a unique integer.
-	"""
-	global sessionKey
-	sessionKey+=1
-	return Session(sessionKey)
-
-
