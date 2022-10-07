@@ -1,5 +1,6 @@
-import exceptions as ex
+import dataclasses as dataclass
 import datetime as datetime
+import exceptions as ex
 
 # ==================================== #
 #||          Input Services
@@ -101,25 +102,4 @@ def printItem(item, itemNum = 1, totalItems = 1):
     for key in itemKeys:
         output+=f'\t{key}: {itemAsDict[key]}\n'
     print(output[:-1])
-# ==================================== #
-
-
-
-# ==================================== #
-#||         Student Services
-
-# ==================================== #
-
-
-
-# ==================================== #
-#||         Session Services
-
-# ==================================== #
-
-
-
-# ==================================== #
-#||         Invoice Services
-
 # ==================================== #
