@@ -84,21 +84,6 @@ def insert_new_session(
 	student.sessions.append(sessionKey)
 	return session
 
-def findSession(key):
-	"""Given a key, returns the Session which belongs to that key. Catches a ValueError in the case where multiple Sessions exist with the given key, or no Sessions exist with the given key.
-
-	Args:
-		key (int): A positive integer to search the sessions for
-
-	Returns:
-		Session: The session matching the given key
-	"""
-	try:
-		result = h.findSingle(sessions,key)
-		return result
-	except ValueError as e:
-		print(e)
-
 def findSessions(keys):
 	"""Given a list of keys, returns a list of sessions corresponding to the list of keys. Catches a ValueError in the case where there are no sessions, or where no sessions correspond to any of the given keys
 
@@ -113,30 +98,3 @@ def findSessions(keys):
 		return results
 	except ValueError as e:
 		print(e)
-
-def ui_new_session():
-	"""
-	Prompts the user to input a Student's details
-	Validates each input.
-	"""
-	student = sm.ui_pick_student()
-	time = ui.get_datetime_input("Please enter the datetime: ")
-	duration = ui.get_float_input("Please enter the duration: ")
-	subject = ui.get_input("Please enter the subject: ").upper()
-	rate = ui.get_integer_input("Please enter their rate: (0 for default)")
-	if rate == 0:
-		rate = student.rate
-	session = insert_new_session(student, time, duration, subject, rate)
-	print("******************************")
-	print("      NEW SESSION ADDED       ")
-	print("******************************")
-	ui.printItem(session)
-	print("******************************")
-
-def getSessionsByStudent(student):
-	"""Prompts the user to select a student that they would like to view the sessions of. Returns a list of the sessions belonging to that student.
-
-	Returns:
-		list (Session): A list of sessions belonging to the student selected
-	"""
-	return findSessions(student.sessions)
