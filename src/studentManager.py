@@ -70,137 +70,69 @@ def exportStudent(s):
 	"""	
 	return [s.name, s.sPhoneNum, s.sEmail, s.pName, s.pPhoneNum, s.pEmail, s.pAddress, s.rate, s.invoices, s.sessions, s.payments]
 
-def findStudent(name):
-	"""Given a name (str) search query, returns the corresponding Student. Raises a ValueError if the search query is not at least the length of the MINIMUM_SEARCH_QUERY_LENGTH
-
-	Args:
-		name (str): a name fragment to search students for (can be an entire name, but expected to be just a few chars)
-	
-	Raises:
-		ValueError
-
-	Returns:
-		Student: the student that matches the given search query
-	"""
-	results = []
-	for s in students:
-		if name.lower() in s.name.lower():
-			results.append(s)
-	if not results:
-		raise ValueError(f'There is no student that matches the query: {name}')
-	if len(results) == 1:
-		return results[0]
-	else:
-		print(f'There are multiple students who match the query: {name}')
-		return results[ui.menuDisplay(None,[s.name for s in results])-1]
-
-def newStudentUI():
-	"""Guides the user through the creation of a new Student object
-
-	1. Prompts the user to input the values of a Student's attributes. These values are validated and the Student's attributes are set to them.
-
-	2. Displays the created Student and asks the user if they want to save the Student. If YES, this Student is appended to the 'students' list to be saved when the program Quits.
-
-	# INTERFACE
-	"""
-	fields = [*Student.__annotations__][:-2]
-	student = Student()
-	for f in fields:
-		while True:
-			userinput = ui.get_input(f'Please enter their {f}: ')
-			if ui.doubleCheck(userinput):
-				try:
-					changeAttribute(student,f,userinput)
-					break
-				except ValueError as e:
-					print(e)
-			else:
-				continue
-	print('''
-******************************
-STUDENT GENERATED SUCCESSFULLY
-******************************''')
-	ui.printItem(student)
-	print('******************************\n******************************\n')
-	x = ui.getChoice('Would you like to save this Student?',ui.yn)
+def insert_new_student(
+		name : str, sPhoneNum : str, sEmail : str,
+		pName : str, pPhoneNum : str, pEmail : str,
+		pAddress : str, rate : int
+		) -> Student.Student:
+	student = Student.Student(name, sPhoneNum, sEmail, pName, pPhoneNum, pEmail, pAddress, rate)
 	student.invoices = []
 	student.sessions = []
 	student.payments = []
-	if x == 'y' or x == '':
-		students.append(student)
-		print("Student saved...\n")
+	students.append(student)
+	return student
 
-def pickStudent(op):
-	"""Prompts the user to select a Student on which to perform the given operation (op).
+def ui_new_student():
+	"""
+	Prompts the user to input a Student's details
+	Validates that an integer was entered for rate, the rest are strings.
+	"""
+	fields = [*Student.__annotations__][:-3] # All but sessions, invoices, payments
+	res = {}
+	for f in fields:
+		while True:
+			res[f] = ui.get_input(f'Please enter their {f}: ')
+			if f == "rate":
+				try:
+					res[f] = h.importIntegerFromString(res[f])
+				except ValueError as e:
+					print(e)
+					continue
+			if ui.doubleCheck(res[f]):
+				break
+	student = insert_new_student(res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7])
+	print("******************************")
+	print("      NEW STUDENT ADDED       ")
+	print("******************************")
+	ui.printItem(student)
+	print("******************************")
 
-	Args:
-		op (str): A message for the user to indicate what operation the Student is being selected for.
-
-	Returns:
-		Student: The student selected by the user
-
-	# INTERFACE
+def ui_pick_student():
+	"""
+	Prompts the user to select a student
 	"""
 	while True:
-		userInput = ui.get_input(f'Which Student would you like {op}? ')
-		try:
-			student = findStudent(userInput)
-		except ValueError as e:
-			print(e)
+		name = ui.get_input(f'Please select a student: ')
+		results = []
+		for s in students:
+			if name.lower() in s.name.lower():
+				results.append(s)
+		if not results:
+			print(f'There is no student matching: {name}')
 			continue
+		if len(results) == 1:
+			student = results[0]
+		else:
+			print(f'There are multiple students who match the query: {name}')
+			student = results[ui.menuDisplay(None,[s.name for s in results])-1]
 		if ui.doubleCheck(student.name):
-			return student	
+			return student
+		else:
+			continue
 
-def viewStudentUI():
-	"""Guides the user through the selection of a Student to view
-
-	1. Prompts the user to select a Student 'to view'
-
+def ui_view_student():
+	"""
+	1. Prompts the user to select a Student
 	2. Prints out the selected Student's Attributes
-
-	# INTERFACE
 	"""
-	student = pickStudent("to view")
-	ui.printItem(student)
-
-def addSessionKey(student,key):
-	"""Adds the given Session Key to the given Student's Session Keys
-
-	Args:
-		student (Student): the student to add the given Session Key to
-		key (int): the Session Key to add to the given Student
-	"""
-	if student.sessions:
-		student.sessions.append(key)
-	else:
-		student.sessions = [key]
-
-def changeAttribute(self,attributeName,newValue):
-	"""Given a Student and attributeName, sets the value of that attribute to the new Value.
-
-	Args:
-		self (Student): A Student to be modified
-		attributeName (str): The name of the attribute to modify
-		newValue (str): The new value to set the attribute to
-	"""
-	switch = [*Student.__annotations__]
-	if attributeName == switch[0]:
-		self.name = newValue
-	elif attributeName == switch[1]:
-		self.sPhoneNum = newValue
-	elif attributeName == switch[2]:
-		self.sEmail = newValue
-	elif attributeName == switch[3]:
-		self.pName = newValue
-	elif attributeName == switch[4]:
-		self.pPhoneNum = newValue
-	elif attributeName == switch[5]:
-		self.pEmail = newValue
-	elif attributeName == switch[6]:
-		self.pAddress = newValue
-	elif attributeName == switch[7]:
-		if not newValue == '':
-			try:
-				self.rate = h.importIntegerFromString(newValue)
-			except ValueError as e:
-				print('Rate could not be edited because',e)
+	ui.printItem(ui_pick_student())
