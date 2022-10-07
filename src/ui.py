@@ -33,7 +33,7 @@ def studentMenu():
 	options = ['Add New','View All','View Student']
 	choice = menuDisplay(name, options)
 	if choice == 1:
-		sm.newStudentUI()
+		sm.ui_new_student()
 	if choice == 2:
 		printItems(sm.students)
 	if choice == 3:
@@ -48,7 +48,7 @@ def sessionMenu():
 	if choice == 2:
 		printItems(xm.sessions)
 	if choice == 3:
-		printItems(xm.getSessionsByStudent(sm.pickStudent("to view the sessions of")))
+		printItems(xm.getSessionsByStudent(sm.ui_pick_student()))
 
 def invoiceMenu():
 	name = "INVOICE MENU"
@@ -58,11 +58,11 @@ def invoiceMenu():
 	if choice == 1:
 		printItems(im.invoices)
 	if choice == 2:
-		printItems(im.getInvoicesByStudent(sm.pickStudent("to view the invoices of")))
+		printItems(im.getInvoicesByStudent(sm.ui_pick_student()))
 	if choice == 3:
 		im.newInvoiceUI()
 	if choice == 4:
-		im.printInvoiceByStudent(sm.pickStudent("to print the invoice of"),
+		im.printInvoiceByStudent(sm.ui_pick_student(),
 			getChoice("What month is the invoice for?", [n+1 for n in range(12)]),
 			getChoice("What year would you like to invoice for?", [n+1 for n in range(2019,2099)]))
 	if choice == 5:
