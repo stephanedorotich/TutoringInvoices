@@ -4,7 +4,6 @@ import Payment
 import helpers as h
 
 payments = []
-validPaymentTypes = ['e-transfer', 'cash', 'cheque']
 
 def loadPayments(filename = 'data/payments.csv'):
 	try:
@@ -43,9 +42,6 @@ def newPayment(paymentType, paymentDate, amount, studentName, invoiceNumber) -> 
 		invoiceNumber)
 	payments.append(newPayment)
 	return paymentKey
-
-def isValidPaymentType(newPaymentType: str) -> bool:
-	return (newPaymentType in validPaymentTypes)
 
 def sumPayments() -> float:
 	total = 0

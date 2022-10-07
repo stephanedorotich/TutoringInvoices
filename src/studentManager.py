@@ -1,9 +1,7 @@
 # studentManager.py
-import sys
 import csv
 import Student
 import helpers as h
-import ui
 
 students = []
 

@@ -1,9 +1,5 @@
 # ui.py
 import sys, os
-import sessionManager as xm
-import invoiceManager as im
-import paymentManager as pm
-import analyzer
 import exceptions as ex
 import ui_service as use
 import ui_operations as uop
@@ -82,12 +78,14 @@ def invoiceMenu():
 
 def analysisMenu():
 	name = "ANALYSIS MENU"
-	options = ['Total Income', 'Monthly Incomes']
+	options = [
+		'Total Income',
+		'Monthly Incomes']
 	choice = use.menuDisplay(name, options)
 	if choice == 1:
-		analyzer.getTotalIncome(pm.payments)
+		uop.get_total_income()
 	if choice == 2:
-		analyzer.getIncomeByMonth(xm.sessions, im.invoices)
+		uop.get_monthly_income()
 
 def quit():
 	uop.save()

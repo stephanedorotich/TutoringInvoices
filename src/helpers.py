@@ -3,9 +3,6 @@ from datetime import datetime
 from datetime import date
 import dataclasses
 
-sessionKey = 1
-invoiceKey = 0
-
 def findSingle(items, key):
 	"""Given a list of items, attempts to find one with the given key
 
