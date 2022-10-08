@@ -82,16 +82,4 @@ def insert_new_session(
 	return session
 
 def findSessions(keys):
-	"""Given a list of keys, returns a list of sessions corresponding to the list of keys. Catches a ValueError in the case where there are no sessions, or where no sessions correspond to any of the given keys
-
-	Args:
-		keys (list): A list of positive integers to search the sessions for
-
-	Returns:
-		list (Session): A list of sessions corresponding to the list of keys
-	"""
-	try:
-		results = h.findMultiple(sessions,keys)
-		return results
-	except ValueError as e:
-		print(e)
+	return h.findMultiple(sessions,keys)

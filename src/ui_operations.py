@@ -103,7 +103,7 @@ def view_all_invoices():
     printItems(im.invoices)
 
 def view_invoices_by_student():
-	use.printItems(im.getInvoicesByStudent(pick_student()))
+	use.printItems(im.findInvoices(pick_student().invoices))
 
 def generate_monthly_invoices():
     im.generateInvoicesByMonth(sm.students,
