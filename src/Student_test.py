@@ -2,9 +2,34 @@ import pytest
 import studentManager as sm
 import Student
 
-def test_insert_new_student():
+@pytest.fixture
+def setup():
+    student = make_student("Bananas")
+    yield student
+    teardown()
+
+def teardown():
+    sm.students.clear()
+
+def make_student(name):
+    student = Student.Student()
+    student.name = name
+    student.sPhoneNum = "sPhoneNum"
+    student.sEmail = "sEmail"
+    student.pName = "pName"
+    student.pPhoneNum = "pPhoneNum"
+    student.pEmail = "pEmail"
+    student.pAddress = "pAddress"
+    student.rate = 60
+    student.invoices = []
+    student.sessions = []
+    student.payments = []
+    sm.students.append(student)
+    return student
+
+def test_insert_new_student(setup):
     tStudent = sm.insert_new_student(
-        "name",
+        "Bananas",
         "sPhoneNum",
         "sEmail",
         "pName",
@@ -12,18 +37,12 @@ def test_insert_new_student():
         "pEmail",
         "pAddress",
         60)
-    
-    eStudent = Student.Student()
-    eStudent.name = "name"
-    eStudent.sPhoneNum = "sPhoneNum"
-    eStudent.sEmail = "sEmail"
-    eStudent.pName = "pName"
-    eStudent.pPhoneNum = "pPhoneNum"
-    eStudent.pEmail = "pEmail"
-    eStudent.pAddress = "pAddress"
-    eStudent.rate = 60
-    eStudent.invoices = []
-    eStudent.sessions = []
-    eStudent.payments = []
+    assert tStudent == setup
 
-    assert tStudent == eStudent
+def test_find_student(setup):
+    assert sm.find_student("Bananas") == setup.student
+
+def test_find_student(setup):
+    with pytest.raises(ValueError):
+        sm.find_student("Apples")
+

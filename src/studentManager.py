@@ -1,9 +1,7 @@
 # studentManager.py
-import sys
 import csv
 import Student
 import helpers as h
-import ui
 
 students = []
 
@@ -79,58 +77,9 @@ def insert_new_student(
 	student.invoices = []
 	student.sessions = []
 	student.payments = []
+	global students
 	students.append(student)
 	return student
 
-def ui_new_student():
-	"""
-	Prompts the user to input a Student's details
-	Validates that an integer was entered for rate, the rest are strings.
-	"""
-	fields = [*Student.Student.__annotations__][:-3]
-	res = {}
-
-	for f in fields:
-		while True:
-			if f == "rate":
-				res[f] = ui.get_integer_input("Please enter their rate")
-			else:
-				res[f] = ui.get_input(f'Please enter their {f}: ')
-			if ui.doubleCheck(res[f]):
-				break
-	student = insert_new_student(res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7])
-	print("******************************")
-	print("      NEW STUDENT ADDED       ")
-	print("******************************")
-	ui.printItem(student)
-	print("******************************")
-
-def ui_pick_student():
-	"""
-	Prompts the user to select a student
-	"""
-	while True:
-		name = ui.get_input(f'Please select a student: ')
-		results = []
-		for s in students:
-			if name.lower() in s.name.lower():
-				results.append(s)
-		if not results:
-			print(f'There is no student matching: {name}')
-			continue
-		if len(results) == 1:
-			student = results[0]
-		else:
-			print(f'There are multiple students who match the query: {name}')
-			student = results[ui.menuDisplay(None,[s.name for s in results])-1]
-		if ui.doubleCheck(student.name):
-			return student
-		else:
-			continue
-
-def ui_view_student():
-	"""
-	1. Prompts the user to select a Student
-	2. Prints out the selected Student's Attributes
-	"""
-	ui.printItem(ui_pick_student())
+def find_student(name):
+	return h.findSingle(students,name)
