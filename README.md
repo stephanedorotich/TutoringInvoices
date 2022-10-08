@@ -8,31 +8,36 @@ date: Oct 7th, 2022
 
 The original code can be found on [my personal github](https://github.com/stephanedorotich/TutoringInvoices). I use it to track my high school tutoring business. Development began in fall 2019.
 
-The program helps me manage my Students, Sessions, and Invoices. I use it to automatically generate PDF invoices that I send to my clients. 
+The program helps me manage my Students, Sessions, and Invoices. I use it to automatically generate PDF invoices to send to my clients. 
 
-The PDF generation is outside the scope of this assignment because it requires configuring LaTeX moving a CLS style sheet to a LaTeX directory so it is available when producing the PDFs.
+Generating PDFs is beyond the scope of this assignment. It's fairly straightforward to set up, but requires installing LaTeX and moving a CLS style sheet to a particular directory.
 
 # Usage
 
 ```python3 src/ui.py```
 
-There are three keywords that can be used:
+While the program is running, there are two keywords that can be used at anytime:
 - `Q`: Quits the program. First saves data to `.csv` files.
 - `MAIN`: Returns the user to the main menu.
-- `TEST`: Changes the program to "test" mode, whose sole purpose is that once `Q` is called, the program exits **without** saving data.
 
 # Commits
 
-| Refactor | Commit Title | Short Hash |
-|:--------:| -------------- |:-----------:|
-| 3 | Refactor 3: Extract methods from newSessionUI() | 60043ba5 |
-| 3 | Refactor 3: Extract method from newStudentUI() | 8c985f18 |
-| 2 | Refactor 2: Removing calls to mainMenu() | 40e5d594 |
-| 2 | Refactor 2: Tests | f2b3fd32 |
-| 2 | Refactor 2: Added global state to ui.py | ab243851 |
-| 2 | Refactor 2: Fixing a typo | e9246cb2 |
-| 2 | Refactor 2: Feature Envy | 8768859f |
-| 1 | Refactor 1: Dead Code | 11b36dbd |
+| Branch | Refactor | Commit Title | Short Hash |
+| ------ |:--------:| -------------- |:-----------:|
+| R4     | 4 | R4: Updating Tests | 06961de5 |
+| R4     | 4 | R4: Analyzer.py absorbed into ui_operations | 1787a5cc |
+| R4     | 4 | R4: Moved invoiceManager ui operations | cf2f677d |
+| R4     | 4 | R4: Implemented SessionMenu operations in ui_operations.py | e5d6a0f7 |
+| R4     | 4 | R4: Migrated all Student Menu options into ui_operations. | 8d9b5692 |
+| R4     | 4 | R4: Created ui_services.py | 0225345e |
+| master | 3 | Refactor 3: Extract methods from newSessionUI() | 60043ba5 |
+| master | 3 | Refactor 3: Extract method from newStudentUI() | 8c985f18 |
+| master | 2 | Refactor 2: Removing calls to mainMenu() | 40e5d594 |
+| master | 2 | Refactor 2: Tests | f2b3fd32 |
+| master | 2 | Refactor 2: Added global state to ui.py | ab243851 |
+| master | 2 | Refactor 2: Fixing a typo | e9246cb2 |
+| master | 2 | Refactor 2: Feature Envy | 8768859f |
+| master | 1 | Refactor 1: Dead Code | 11b36dbd |
 
 # Testing
 
@@ -223,18 +228,156 @@ Taking these two core methods of the program and splitting them into ones that a
 Additionally, the new naming convention creates more clarity as to what the methods do. `ui_X` indicates that there will be user interaction while `insert_X` indicates that there will be some sort of data addition (harkening to the INSERT SQL statement.)
 
 
-# Refactor 4
+# Refactor 4 - MAJOR
 
-## Code Smell: 
+## Code Smell: Large Class
 
-## Solution:
+The previous refactorings have been preparing for the decoupling of user interactions from the data classes. In my program, the `studentManager`, `sessionManager`, and `invoiceManager` all have a combination of UI oriented methods and data oriented methods. These classes are doing two different things and is not conduscive to the future development of a GUI or a proper database backend system.
+
+## Solution: Extract Class
+
+To remedy the situation, **all** of the UI oriented methods are being aggregated in a new `ui_operations` class whose responsibility is entirely to implement the menu options of the program.
 
 ## Resulting Code
 
+### Commit: `0225345e`
+- Created empty `ui_service.py` file
+
+### Commit: `cd26ac43`
+- `ui.py`
+    - All code relating to getting user input was moved to `ui_services.py`
+    - The `isTest` global variable was removed.
+    - The keywords "Q" and "MAIN" now throw unique exceptions that determine how they are handled
+- `ui_services.py`
+    - Where all user input methods were relocated.
+- `exceptions.py`
+    - Created two custom exceptions used for program flow. `Quit` and `GoToMain`.
+
+### Commit: `8d9b5692`
+- `studentManager.py`
+    - Moved `ui_new_student()` to `uop`
+    - Moved `ui_pick_student()` to `uop`
+    - Moved `ui_view_student()` to  `uop`
+- `ui.py`
+    - Earlier attempt to pass `ui_services` as an object were inneffective. Reverted to making regular calls to the file instead.
+    - Updated `studentMenu` to **only** make calls to `uop`.
+- Created `ui_operations.py` (`uop`)
+    - Added `new_student()`
+    - Added `pick_student()`
+    - Added `view_student()`
+    - Added `view_single_student()`
+- `ui_service.py` removed comments
+
+### Commit: `e5d6a0f7`
+- `sessionManager.py`
+    - Moved `ui_new_session()` to `uop`
+    - Moved `findSession()` to `uop`
+    - Deleted `getSessionsByStudent()` because it was effectively an alias for `findSessions()`.
+- `ui.py`
+    - Updated `sessionMenu()` to **only** make calls to `uop`
+- `ui_operations.py`
+    - Added `new_session()`
+    - Added `view_all_sessions()`
+    - Added `view_sessions_by_student()`
+
+### Commit: `cf2f677d`
+- `invoiceManager.py`
+    - Moved `newInvoiceUI()` to `uop`
+    - Moved `payInvoiceUI()` to `uop`
+    - Removed obsolete `changeAttribute()`
+    - Renamed `createMonthlyInvoice()` to `insert_new_invoice`
+- `ui.py`
+    - Updated `invoiceMenu()` to **only** make calls to `uop`
+    - Removed obsolete import statements
+    - Updated `quit()` to get `uop` to save data
+    - Updated `run()` to get `uop` to load data
+- `ui_operations.py`
+    - Updated `new_student()` to remove obscurity - it no longer depends on the Student dataclass
+    - Added `new_invoice_for_student()`
+    - Added `view_all_invoices()`
+    - Added `view_invoices_by_student()`
+    - Added `generate_monthly_invoices()`
+    - Added `print_student_invoice()`
+    - Added `print_monthly_invoices()`
+    - Added `pay_invoice`
+    - Added `load()`
+    - Added `save()`
+- `paymentManager.py` bugfix
+- `sessionManager.py` bugfix
+- `studentManager.py` bugfix
+- `ui_service.py`
+    - Added `get_date_input()`
+    - Bugfix `get_float_input()`
+    - Bugfix `validateChoice()`
+
+### Commit: `1787a5cc`
+- `analyzer.py`
+    - Moved `getTotalIncome` to `uop`
+    - Moved `getIncomeByMonth` to `uop`
+- `ui.py`
+    - Updated `analysisMenu()` to **only** make calls to `uop`
+    - Removed obsolete import statements
+- `ui_operations.py`
+    - Added `get_total_income()`
+    - Added `get_monthly_income()`
+- `paymentManager.py`
+    - Removed dead code
+- `invoiceManager.py` removed obsolete import statements
+- `sessionManager.py` removed obsolete import statements
+- `studentManager.py` removed obsolete import statements
+- `helpers.py` removed unused global variables
+
+### Commit: `06961de5`
+- `Session_test.py` updated (see below)
+- `Student_test.py` updated (see below)
+- `ui_serivice_test.py` renamed (from `ui_test.py`) and updated (see below)
+- `invoiceManager.py`
+    - Simplified `findInvoice()`
+    - Simplified `findInvoices()`
+    - Removed `getInvoicesByStudent()` - two usages, alias for `findInvoices()`
+    - Updated `printInvoiceByStudent()`
+- `pdfManager.py` bugfix
+- `sessionManager.py`
+    - Simplified `findSessions()`
+- `studentManager.py`
+    - Simplified `findSudent()`
+- `ui_operations.py`
+    - Updated `view_invoices_by_student()` to accomodate  removal of `getInvoicesByStudent()`
+
 ## Testing
+
+Existing tests were updated to test the newly migrated code. Setup/teardown was added to most test modules. New tests were developped for `findSessions()` and `findStudent()`. The `ui_test.py` file was no longer effective. Foremost, because all of the methods it previously tested had been moved to `ui_service.py` and secondly, because the control flow of the program had changed. Consequently, this group of tests were renamed to `ui_service_test.py` and redesigned to account for the changes.
+
+Extensive unit testing was not feasible for this stage of refactoring. The entirety of `ui_operations.py` consists of heavy UI methods. Almost every method requires multiple user inputs - and simulating multiple user inputs is conflated and difficult using PyTest.
+
+Instead of unit testing, I methodically called each of the 15 menu options and ensured that they:
+- a) Executed without error
+- b) Produced the expected output // created the correct data
+
+The bugfixes noted in commit `cf2f677d` were all detected using this testing method.
+
 
 ## Justification
 
+Oh my god! It's like I redecorated my entire bedroom!!!
+
+SO FRESH!
+
+In seriousness though, this refactoring was amazing. Here are some of the things that it achieved:
+
+1. `ui.py` has no awareness of the data classes now, all import statements were removed.
+2. `_Manager.py` classes have no UI methods.
+3. `ui.py` is now 100% focused on the control flow of the program.
+4. `ui_service.py` contains all UI methods.
+5. `ui_operations.py` contains all methods responsible for handling interaction between the *app* and the *data*.
+
+One of the things that I'm happy about is how much I was able to clean up the import statements. Not so long ago, `ui` imported `studentManager` which imported `ui`. I had these really weird circular import statements where files depended on each other for a bunch of features. I am really pleased to have isolated these features.
+
+These changes have a huge positive impact on the ease of *future development*. Functionality of the program is now reasonably allocated with little to no cross over between domains. Developing a proper backend actually seems like something I can do now :) Adding new features is trivial now, I can:
+
+- modify a menu in `ui`,
+- write a method in `ui_operations` for the feature, and
+- leverage any of the UI utilities from `ui_service`
 
 # Refactor 5
 
