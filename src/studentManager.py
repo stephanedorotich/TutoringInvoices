@@ -81,9 +81,5 @@ def insert_new_student(
 	students.append(student)
 	return student
 
-def findStudent(name):
-	try:
-		result = h.findSingle(students,name)
-		return result
-	except ValueError as e:
-		print(e)
+def find_student(name):
+	return h.findSingle(students,name)

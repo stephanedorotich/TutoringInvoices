@@ -42,18 +42,13 @@ def exportInvoice(i):
 	return [i.key, i.student, str(str(i.billingPeriod[0])+','+str(i.billingPeriod[1])), i.sessions, i.payments, i.total, i.totalPaid]
 
 def findInvoice(key):
-	try:
-		result = h.findSingle(invoices,key)
-		return result
-	except ValueError as e:
-		print(e)
+	return h.findSingle(invoices,key)
 
 def findInvoices(keys):
-	results = h.findMultiple(invoices,keys)
-	return results
+	return h.findMultiple(invoices,keys)
 
 def printInvoiceByStudent(student, month, year):
-	invoices = getInvoicesByStudent(student)
+	invoices = findInvoices(student.invoices)
 	for i in invoices:
 		if (i.billingPeriod[0].month == month) & (i.billingPeriod[0].year == year):
 			pdfm.printPDF(i)
@@ -94,6 +89,3 @@ def insert_new_invoice(student, month, year):
 	invoices.append(invoice)
 	student.invoices.append(invoiceKey)
 	return invoice.key
-
-def getInvoicesByStudent(student):
-	return findInvoices(student.invoices)

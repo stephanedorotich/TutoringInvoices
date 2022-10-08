@@ -16,7 +16,7 @@ def getInvNum(invKey):
 	return invNum
 
 def printPDF(invoice):
-	student = sm.findStudent(invoice.student)
+	student = sm.find_student(invoice.student)
 	sessions = xm.findSessions(invoice.sessions)
 	invoiceNumber = getInvNum(invoice.key)
 	filename = f'TutoringInvoice{invoiceNumber}-{student.name.split(" ")[0]}'
