@@ -236,7 +236,10 @@ The previous refactorings have been preparing for the decoupling of user interac
 
 ## Solution: Extract Class
 
-To remedy the situation, **all** of the UI oriented methods are being aggregated in a new `ui_operations` class whose responsibility is entirely to implement the menu options of the program.
+The goal is to aggreggate the user interaction methods, instead of leaving them scattered around my program. Two new classes will be created.
+
+- All UI methods (ones that print to stdout and read from stdin) are moved to `ui_service.py`.
+- All user functions (ones that are defined as part of the menus) are either created or moved to `ui_operations.py`. This class will interface with the data classes to fulfill user needs.
 
 ## Resulting Code
 

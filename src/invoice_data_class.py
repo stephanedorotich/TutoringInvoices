@@ -18,6 +18,11 @@ class invoice_data_class(abstract_data_class):
     def get_invoices_by_student_key(self, sKey: np.int64):
         return self._data[self._data.studentKey == sKey]
 
+    def get_unpaid_invoices(self, df = pd.DataFrame()):
+        if df.empty:
+            df = self._data
+        return df[df.totalPaid < df.total]
+
     def make_invoice(self, sKey: int, startDate: str, endDate: str, df: pd.DataFrame):
         cost = (df['duration'] * df['rate']).sum()
         row = []
