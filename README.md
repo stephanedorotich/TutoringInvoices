@@ -1,29 +1,43 @@
 ---
 author: Stéphane Dorotich
 title: Assignment 1 - Refactoring
-date: Oct 7th, 2022
+date: Oct 8th, 2022
 ---
+
+You will find this report and project at these repositories:
+
+-  [https://github.com/stephanedorotich/TutoringInvoices](https://github.com/stephanedorotich/TutoringInvoices)
+- [https://gitlab.cpsc.ucalgary.ca/stephane.dorotich/501](https://gitlab.cpsc.ucalgary.ca/stephane.dorotich/501)
 
 # Code Source
 
-The original code can be found on [my personal github](https://github.com/stephanedorotich/TutoringInvoices). I use it to track my high school tutoring business. Development began in fall 2019.
+This code is my own. I use it to track my high school tutoring business. Development began in fall 2019. I have updated my personal repository concurrently with this assignment. The original code can be viewed on [this commit](https://github.com/stephanedorotich/TutoringInvoices/tree/357dcf909d14191ccf62a33de2512f05dfcbadb7).
 
-The program helps me manage my Students, Sessions, and Invoices. I use it to automatically generate PDF invoices to send to my clients. 
-
-Generating PDFs is beyond the scope of this assignment. It's fairly straightforward to set up, but requires installing LaTeX and moving a CLS style sheet to a particular directory.
+The program helps me manage my Students, Sessions, and Invoices. I use it to automatically generate PDF invoices to send to my clients. Generating PDFs is beyond the scope of this assignment. Due to the complexity of the final refactor, this feature has been disabled.
 
 # Usage
 
-```python3 src/ui.py```
+To run the program, use the command: ```python3 src/ui.py```
 
 While the program is running, there are two keywords that can be used at anytime:
-- `Q`: Quits the program. First saves data to `.csv` files.
+- `Q`: Saves data and exits the program.
 - `MAIN`: Returns the user to the main menu.
 
 # Commits
 
 | Branch | Refactor | Commit Title | Short Hash |
 | ------ |:--------:| -------------- |:-----------:|
+| master | 5 | Merge branch 'R5' | ff05978a |
+| R5     | 5 | Adding fake data | a327ef6d |
+| R5     | 5 | R5: Removing obsolete code :) | b1d59951 |
+| R5     | 5 | R5: Updated invoice_data_class to update with payment | de098c44 |
+| R5     | 5 | R5: Bugfix pay_invoice | e383c096 |
+| R5     | 5 | R5: Finished implementation of Invoice Menu | c0572cd8 |
+| R5     | 5 | R5: Invoice Menu functionality | aabd1e01 |
+| R5     | 5 | R5: Updated abstract_data_class | bd905800 |
+| R5     | 5 | R5: Student & Session Menus functional | aba6babb |
+| R5     | 5 | R5: Creationg of data classes | 5a47cde8 |
+| master | 4 | Merge branch 'R4' into 'master' | 60035dfa |
 | R4     | 4 | R4: Updating Tests | 06961de5 |
 | R4     | 4 | R4: Analyzer.py absorbed into ui_operations | 1787a5cc |
 | R4     | 4 | R4: Moved invoiceManager ui operations | cf2f677d |
@@ -66,8 +80,8 @@ The methods for these utilities were all removed. The menus from which these uti
 
 ## Resulting Code
 
-
-The following files and methods were affected.
+<details>
+<summary>Refactor 1 Commit History</summary>
 
 ### Commit `11b36dbd`
 
@@ -82,6 +96,7 @@ The following files and methods were affected.
     - Updated: `studentMenu()`
     - Updated: `invoiceMenu()`
     - Updated: `run()`
+</details>
 
 ## Testing
 
@@ -117,6 +132,9 @@ The `run()` method in `ui.py` was updated so that it uses global state variables
 ## Resulting Code
 
 The following files and methods were affected.
+
+<details>
+<summary>Refactor 2 Commit History</summary>
 
 ### Commit `8768859f`
 
@@ -157,6 +175,7 @@ The following files and methods were affected.
 
 - `ui.py`
     - Removed the calls to `mainMenu()` from each of the sub-menus. The previous implementation would "extend" the call stack indefinitely. Now - more appropriately - the `run()` method is solely responsible for calling the `mainMenu()` method.
+</details>
 
 ## Testing
 
@@ -190,6 +209,8 @@ To improve my design, I separated the functionality of user interaction from dat
 
 The following files and methods were affected.
 
+<details>
+<summary>Refactor 3 Commit History</summary>
 ### Commit `8c985f18`
 
 - `studentManager.py`
@@ -212,6 +233,7 @@ The following files and methods were affected.
     - In `sessionMenu()` replaced call to `newSessionUI()` with `ui_new_session()`
 - `studentManager.py`
     - Updated `ui_new_student()` to use the new `get_integer_input()` method. Bug fixed bad call to the fields of the Student class.
+</details>
 
 ## Testing
 
@@ -242,6 +264,9 @@ The goal is to aggreggate the user interaction methods, instead of leaving them 
 - All user functions (ones that are defined as part of the menus) are either created or moved to `ui_operations.py`. This class will interface with the data classes to fulfill user needs.
 
 ## Resulting Code
+
+<details>
+<summary>Refactor 4 Commit History</summary>
 
 ### Commit: `0225345e`
 - Created empty `ui_service.py` file
@@ -346,6 +371,7 @@ The goal is to aggreggate the user interaction methods, instead of leaving them 
     - Simplified `findSudent()`
 - `ui_operations.py`
     - Updated `view_invoices_by_student()` to accomodate  removal of `getInvoicesByStudent()`
+</details>
 
 ## Testing
 
@@ -398,20 +424,144 @@ The solution is the extract a superclass, called `abstract_data_class` which can
 
 In doing so, the functionality of those classes can be rigorously controlled to ensure they all meet the same specifications.
 
-As I extracted the superclass, I realized that the `load` and `save` methods were not going to generalize well. I made the rather involved decision to reconstruct the backend of my app by using the `pandas` library and using `DataFrames` to store and manipulate my program's data.
+As I extracted the superclass, I realized that the `load` and `save` methods were not going to generalize well. To remedy this, I decided to entirely reconstruct the backend of my program using the `pandas` library and its `DataFrames`. The data design changed significantly.
 
 ## Resulting Code
 
-Oh my goodness sooooo many changes AAAGGGHHHHHH!
+The resulting code is a complete reworking of the data driven aspects of my code. I removed the `object` based design that I had before, where each type (student, session, invoice, payment) was stored like an object whose fields were easily accessed.
+
+Instead, each data type is stored in a DataFrame, which is akin to the tables in a relational database. Each entry, or row, represents a single object.
+
+Previously, my Student objects had Lists that stored the keys of the Sessions, Invoices, and Payments that belonged to them. This made finding those objects quite straightforward, however, storing a list as an entry in a table is **not good practice**. Instead, I realized that each table row for sessions, invoices, and payments, could instead store the studentKey of who they belong to.
+
+The program functions much more like a relational database that is being queried. This is aligned with my original intentions when developing the code. At the time, I lacked the knowledge and expertise to build it in this way.
+
+<details>
+<summary>Commit History</summary>
+
+### Commit `5a47cde8`
+
+- Created `abstract_data_class`
+    - With methods `__new__`, `__init__`, `__init_subclass__`, `load_dataframe`, `save_dataframe`, `insert_new`, `find_single`, `find_multiple`
+- Created `invoice_data_class`, `payment_data_class`, `session_data_class`, `student_data_class`
+    - Each one implements the required global vars `fname`, `dtype`, and `parse_dates`
+
+### Commit `aba6babb`
+
+- `abstract_data_class`
+    - added print statements to `save_dataframe` and `insert_new`
+- `session_data_class`
+    - added `get_sessions_by_student_key`
+- `student_data_class`
+    - added `find_by_name`
+- `ui_operations`
+    - turned `ui_operations` into a class, updated calls accordingly.
+    - updated `load()` to call on new dataclasses
+    - update `save()` to call on new dataclasses
+    - rewrote `new_student()` to work with pandas DataFrames
+    - rewrote `pick_student()` to work with pandas DataFrames
+    - rewrote `view_all_students()` to work with pandas DataFrames
+    - rewrote `view_single_student()` to work with pandas DataFrames
+    - rewrote `new_session()` to work with pandas DataFrames
+    - rewrote `view_all_sessions()` to work with pandas DataFrames
+    - rewrote `view_sessions_by_student()` to work with pandas DataFrames
+- `ui`
+    - Turned `ui` into a class, updated calls accordingly.
+
+### Commit `bd905800`
+
+- `abstract_data_class`
+    - Call the `load_dataframe` method from the `__init__` method
+    - Ensure that all `superclass` methods **return** something
+  
+### Commit `aabd1e01`
+
+- `invoice_data_class`
+    - added `get_invoices_by_student_key`
+    - added `make_invoice`
+- `session_data_class`
+    - added `get_sessions_by_month`
+    - added `get_uninvoiced_sessions`
+    - added `update_sessions_with_invoice_key`
+- `ui_operations`
+    - updated `pick_student` with a print statement
+    - rewrote `new_invoice_for_student` to work with pandas DataFrames
+    - rewrote `view_all_invoices` to work with pandas DataFrames
+    - rewrote `view_invoices_by_student` to work with pandas DataFrames
+    - rewrote `generate_monthly_invoices` to work with pandas DataFrames
+    - removed obsolete calls to `*Manager.py` files
+
+### Commit `c0572cd8`
+
+- `invoice_data_class`
+    - added `get_unpaid_invoices`
+- `ui`
+    - updated `run()` method to catch `NotImplementedError`
+- `ui_operations`
+    - rewrote `pay_invoice` to work with pandas DataFrames
+    - updated `print_student_invoices` to throw `NotImplementedError`
+    - updated `print_monthly_invoices` to throw `NotImplementedError`
+
+### Commit `e383c096`
+
+- `ui_operations`
+    - removed obsolete import statements
+    - updated `view_invoices_by_student` to print statement if user has no invoices to view
+    - updated `pay_invoice` so that it updates the invoice's totalPaid amount in addition to creating a new payment.
+    - updated `get_total_income` to throw `NotImplementedError`
+    - updated `get_monthly_income` to throw `NotImplementedError`
+
+### Commit `de098c44`
+
+- `invoice_data_class`
+    - added `update_invoice_with_payment_amount` to complete functionality of previous commit.
+
+### Commit `b1d59951`
+
+- Deleted `Invoice.py`
+- Deleted `Payment.py`
+- Deleted `Session.py`
+- Deleted `Student.py`
+- Deleted `Session_test.py`
+- Deleted `Student_test.py`
+- Deleted `invoiceManager.py`
+- Deleted `paymentManager.py`
+- Deleted `pdfManager.py`
+- Deleted `sessionManager.py`
+- Deleted `studentManager.py`
+- `helpers`
+    - removed `findSingle()`
+    - removed `findMultiple()`
+
+### Commit `a327ef6d`
+
+- Added fake data.
+
+</details>
 
 ## Testing
 
-Due to time constraints, rigorous testing was not an option. Additionally, previous test cases were no longer needed because the prolific changes resulted in most of my old code becoming obsolete.
+Unfortunately, rigorous unit testing was not an option for this refactoring. The main reason for this is limitations in "budget." I designed 15 testable methods in my data_classes and updated 12/16 methods in `ui_operations` about 7 are or can be made to be testable.
 
-Instead, I once again took the approach of rigorously reviewing each of the 15 menu options to ensure that my program provides and ensuring that the program behaves as expected.
+Developing rigorous unit tests for 22 methods is not feasible given the timeline for this assignment (and given that I started this final refactoring late.)
+
+Instead, to ensure the integrity of my code (because I **do** use this for my business) I methodically reviewed each of the 15 menu options to ensure that my program produces correct output and does not crash on any inputs.
 
 ## Justification
 
-Making this change dramatically increases the integrity of my data. It hides the complexity of data storage and manipulation. It allows for future changes to be made such as developing a SQLite database to store the data, as that interfaces well with Pandas dataframes. The overhaul reduced the complexity of my save and load methods and opened up a powerful suite of data manipulation and analysis techniques to use, rather than dealing with my clunky lists.
+Making this change protects my data. The complexity of data storage and manipulation is hidden inside of data classes and behaves much more like queries on a relational database. This design style supports future changes such as using a SQLite database to store my data - as SQLite interfaces well with Pandas.
 
-Additionally, by changing the underlying data structures of my program, I was able to remove the improper use of "lists with a list" that my program relied on, and have a much cleaner data structure that uses keys to indicate relationships between data.
+The overhaul elimited the complexity of my save and load, it turned them from a dangerous and possibly buggy mess to **very clean one-liners**.
+
+Using pandas DataFrames opens up a powerful suite of data manipulation and analysis opportunities. I know longer need to build clunky methods that deal with my hacked-together lists of data.
+
+Using keys to indicate relationships allowed me to remove the improper use of "lists within lists" that my program relied on.
+
+Additionally, going through this process allowed me to learn about:
+
+- creating Classes,
+- extending Classes,
+- using Classes as Objects, and
+- using Pandas DataFrames
+
+This refactoring assignment as a whole allowed me to think critically about my code and iteratively develop a solid design for a substantial collection of code. I am very pleased with the results :)
