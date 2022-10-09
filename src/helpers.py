@@ -3,68 +3,6 @@ from datetime import datetime
 from datetime import date
 import dataclasses
 
-def findSingle(items, key):
-	"""Given a list of items, attempts to find one with the given key
-
-	Args:
-		items (list): a list of invoices, sessions, or students
-		key (int or str): an integer or student_name search query
-
-	Raises:
-		ValueError: if no item matches the key, if multiple items do, or if the list of items is empty
-
-	Returns:
-		item: the invoice, student or session matching the search query
-	"""
-	if items:
-		results = []
-		itemType = f'{type(items[0])}'.split(' ')[-1].split('.')[-1].replace("'",'').replace('>','')
-		# itemType yields 'student', 'session', or 'invoice'
-		itemKeyName = [*items[0].__annotations__][0]
-		# itemKeyName yields a list of the attributes of the given itemType
-		for n in range(len(items)):
-			item = dataclasses.asdict(items[n])
-			if item[itemKeyName] == key:
-				results.append(items[n])
-		if not results:
-			raise ValueError(f'There are no {itemType}s with this key: "{key}"')
-		elif len(results) == 1:
-			return results[0]
-		else:
-			raise ValueError(f'There are multiple {itemType}s that share this key: {key}')
-	else:
-		raise ValueError(f'There are no items to search')
-
-def findMultiple(items, keys):
-	"""Given a list of items and a list of keys, attempts to find all items that match any of the keys.
-
-	Args:
-		items (list): a list of invoices, sessions, or students
-		keys (list): a list of integer or student_name search queries
-
-	Raises:
-		ValueError: if no items match any of the keys, or if items is empty
-
-	Returns:
-		list: a list of invoices, sessions, or students that match any of the keys
-	"""
-	if items:
-		results = []
-		itemType = f'{type(items[0])}'.split(' ')[-1].split('.')[-1].replace("'",'').replace('>','')
-		# itemType yields 'student', 'session', or 'invoice'
-		itemKeyName = [*items[0].__annotations__][0]
-		# itemKeyName yields a list of the attributes of the given itemType
-		for n in range(len(items)):
-			item = dataclasses.asdict(items[n])
-			if item[itemKeyName] in keys:
-				results.append(items[n])
-		if not results:
-			raise ValueError(f'There are no {itemType}s with these keys: {keys}')
-		else:
-			return results
-	else:
-		raise ValueError(f'There are no items to search')
-
 def importBooleanFromString(val):
 	"""Converts a string to a boolean.
 	Used when loading objects from csv files.
