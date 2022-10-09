@@ -3,11 +3,6 @@ import os
 from datetime import datetime
 import ui_service as use
 import helpers as h
-import studentManager as sm
-import sessionManager as xm
-import invoiceManager as im
-import paymentManager as pm
-
 import invoice_data_class
 import payment_data_class
 import session_data_class
@@ -124,8 +119,12 @@ class ui_operations():
         student = self.pick_student()
         sKey = student.at['studentKey']
         df = self._idc.get_invoices_by_student_key(sKey)
+        if df.empty:
+            print(f"{student.at['name']} has no invoices")
+            return False
         print(f"\n{student.at['name']}'s invoices")
         print(df)
+        return True
 
     def generate_monthly_invoices(self):
         month = use.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)])
@@ -183,7 +182,8 @@ class ui_operations():
         row.append(sKey)
         row.append(invoice['invoiceKey'])
 
-        self._pdc.insert_new(row)
+        payment = self._pdc.insert_new(row)
+        self._idc.update_invoice_with_payment_amount(invoice['invoiceKey'],payment['amount'])
     # ==================================== #
 
 
@@ -191,49 +191,51 @@ class ui_operations():
     # ==================================== #
     #||         Analysis Services
     def get_total_income(self):
-        totalCash = 0
-        totalEtransfer = 0
-        totalCheque = 0
-        for payment in pm.payments:
-            if payment.paymentType == 'cash':
-                totalCash += payment.amount
-            elif payment.paymentType == 'e-transfer':
-                totalEtransfer += payment.amount
-            elif payment.paymentType == 'cheque':
-                totalCheque += payment.amount
-        print(f'\nTotal cash: {totalCash}')
-        print(f'Total e-transfer: {totalEtransfer}')
-        print(f'Total cheque: {totalCheque}')
-        print(f'\nGrand Total: {totalCash + totalEtransfer + totalCheque}')
+        raise NotImplementedError("Analysis not currently supported")
+        # totalCash = 0
+        # totalEtransfer = 0
+        # totalCheque = 0
+        # for payment in pm.payments:
+        #     if payment.paymentType == 'cash':
+        #         totalCash += payment.amount
+        #     elif payment.paymentType == 'e-transfer':
+        #         totalEtransfer += payment.amount
+        #     elif payment.paymentType == 'cheque':
+        #         totalCheque += payment.amount
+        # print(f'\nTotal cash: {totalCash}')
+        # print(f'Total e-transfer: {totalEtransfer}')
+        # print(f'Total cheque: {totalCheque}')
+        # print(f'\nGrand Total: {totalCash + totalEtransfer + totalCheque}')
 
     def get_monthly_income(self):
-        monthlyIncomes = {}
-        yearlyIncomes = {}
-        for session in xm.sessions:
-            month = session.datetime.month
-            year = session.datetime.year
-            if not year in monthlyIncomes:
-                monthlyIncomes[year] = {}
-            if not month in monthlyIncomes[year]:
-                monthlyIncomes[year][month] = [0,0,0,0]
-            if not year in yearlyIncomes:
-                yearlyIncomes[year] = [0,0,0,0]
-            yearlyIncomes[year][0] += session.duration * session.rate
-            yearlyIncomes[year][2] += session.duration
-            yearlyIncomes[year][3] += 1
-            monthlyIncomes[year][month][0] += session.duration * session.rate
-            monthlyIncomes[year][month][2] += session.duration
-            monthlyIncomes[year][month][3] += 1
-        for invoice in im.invoices:
-            month = invoice.billingPeriod[0].month
-            year = invoice.billingPeriod[0].year
-            yearlyIncomes[year][1] += invoice.totalPaid
-            monthlyIncomes[year][month][1] += invoice.totalPaid
-        for year in [*monthlyIncomes]:
-            print(year)
-            for month in [*monthlyIncomes[year]]:
-                print(f'\t{calendar.month_abbr[month]}:\t{monthlyIncomes[year][month]}')
-            print(f'Total:\t\t{yearlyIncomes[year]}\n')
+        raise NotImplementedError("Analysis not currently supported")
+            # monthlyIncomes = {}
+            # yearlyIncomes = {}
+            # for session in xm.sessions:
+            #     month = session.datetime.month
+            #     year = session.datetime.year
+            #     if not year in monthlyIncomes:
+            #         monthlyIncomes[year] = {}
+            #     if not month in monthlyIncomes[year]:
+            #         monthlyIncomes[year][month] = [0,0,0,0]
+            #     if not year in yearlyIncomes:
+            #         yearlyIncomes[year] = [0,0,0,0]
+            #     yearlyIncomes[year][0] += session.duration * session.rate
+            #     yearlyIncomes[year][2] += session.duration
+            #     yearlyIncomes[year][3] += 1
+            #     monthlyIncomes[year][month][0] += session.duration * session.rate
+            #     monthlyIncomes[year][month][2] += session.duration
+            #     monthlyIncomes[year][month][3] += 1
+            # for invoice in im.invoices:
+            #     month = invoice.billingPeriod[0].month
+            #     year = invoice.billingPeriod[0].year
+            #     yearlyIncomes[year][1] += invoice.totalPaid
+            #     monthlyIncomes[year][month][1] += invoice.totalPaid
+            # for year in [*monthlyIncomes]:
+            #     print(year)
+            #     for month in [*monthlyIncomes[year]]:
+            #         print(f'\t{calendar.month_abbr[month]}:\t{monthlyIncomes[year][month]}')
+            #     print(f'Total:\t\t{yearlyIncomes[year]}\n')
     # ==================================== #
 
 
