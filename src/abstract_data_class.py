@@ -32,13 +32,14 @@ class abstract_data_class(metaclass=abc.ABCMeta):
     def save_dataframe(self):
         """Save the data"""
         self._data.to_csv(self.fname, header=None, index=None)
+        print(f"Saved {self.__class__.__name__}")
 
     def insert_new(self, row: list):
         """Add a new object to the data"""
         i = self._data.shape[0]
         row.insert(0, i)
-        print(row)
         self._data.loc[i] = row
+        print(self._data.iloc[-1])
 
     def find_single(self, key: int):
         """Return the object in data that matches the key"""
