@@ -23,6 +23,9 @@ class invoice_data_class(abstract_data_class):
             df = self._data
         return df[df.totalPaid < df.total]
 
+    def update_invoice_with_payment_amount(self, invoiceKey, amount):
+        self._data.at[invoiceKey, 'totalPaid']+=amount
+
     def make_invoice(self, sKey: int, startDate: str, endDate: str, df: pd.DataFrame):
         cost = (df['duration'] * df['rate']).sum()
         row = []
