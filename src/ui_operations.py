@@ -149,28 +149,41 @@ class ui_operations():
 
 
     def print_student_invoice(self):
-        im.printInvoiceByStudent(pick_student(),
-            use.getChoice("What month is the invoice for?", [n+1 for n in range(12)]),
-            use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)]))
+        raise NotImplementedError("Generating PDF invoices is not currently supported")
+        # im.printInvoiceByStudent(pick_student(),
+        #     use.getChoice("What month is the invoice for?", [n+1 for n in range(12)]),
+        #     use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)]))
 
     def print_monthly_invoices(self):
-        im.printInvoicesByMonth(
-            use.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]),
-            use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)]))
+        raise NotImplementedError("Generating PDF invoices is not currently supported")
+        # im.printInvoicesByMonth(
+        #     use.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]),
+        #     use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)]))
 
     def pay_invoice(self):
-        student = pick_student()
-        invoice = im.findInvoice(use.getChoice(f'Please select an invoice: {student.invoices}',student.invoices))
-        use.printItem(invoice)
+        student = self.pick_student()
+        sKey = student.at['studentKey']
 
-        paymentAmount = use.get_float_input("Please enter the payment amount: ")
-        paymentType = use.getChoice(f'Please enter the payment type: ',['cash','e-transfer','cheque'])
-        paymentDate = use.get_date_input("Please enter the payment date: ")
+        df = self._idc.get_invoices_by_student_key(sKey)
+        df = self._idc.get_unpaid_invoices(df)
+        if df.empty:
+            print(f"{student.at['name']} has no unpaid invoices")
 
-        newPaymentKey = pm.newPayment(paymentType, paymentDate, paymentAmount, student.name, invoice.key)
-        student.payments.append(newPaymentKey)
-        invoice.payments.append(newPaymentKey)
-        invoice.totalPaid += paymentAmount
+        iKeys = df['invoiceKey'].tolist()
+        choice = use.menuDisplay(f'Please select the', iKeys)
+        choice-=1 # subtract 1 for proper indexing
+        invoice = df.iloc[choice]
+        print(invoice)
+        print(invoice['invoiceKey'])
+
+        row = []
+        row.append(use.getChoice(f'Please enter the payment type: ',['cash','e-transfer','cheque']))
+        row.append(use.get_date_input("Please enter the payment date: "))
+        row.append(use.get_float_input("Please enter the payment amount: "))
+        row.append(sKey)
+        row.append(invoice['invoiceKey'])
+
+        self._pdc.insert_new(row)
     # ==================================== #
 
 

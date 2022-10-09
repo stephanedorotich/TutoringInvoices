@@ -102,6 +102,9 @@ class ui_app():
 				continue
 			except ex.Quit:
 				self.quit()
+			except NotImplementedError as e:
+				print(e)
+				continue
 
 if __name__ == "__main__":
 	app = ui_app()
