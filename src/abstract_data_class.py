@@ -14,7 +14,7 @@ class abstract_data_class(metaclass=abc.ABCMeta):
         return super().__new__(cls)
     
     def __init__(self):
-        self.load_dataframe()
+        self._data = self.load_dataframe()
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -25,14 +25,15 @@ class abstract_data_class(metaclass=abc.ABCMeta):
         if cls.parse_dates is NotImplemented:
             raise NotImplementedError("Please implement the `parse_dates` class variable")
 
-    def load_dataframe(self):
+    def load_dataframe(self) -> pd.DataFrame:
         """Load in the data"""
-        self._data = pd.read_csv(self.fname, header=None, names=self.dtype.keys(), dtype=self.dtype, parse_dates=self.parse_dates)
+        return pd.read_csv(self.fname, header=None, names=self.dtype.keys(), dtype=self.dtype, parse_dates=self.parse_dates)
 
-    def save_dataframe(self):
+    def save_dataframe(self) -> bool:
         """Save the data"""
         self._data.to_csv(self.fname, header=None, index=None)
         print(f"Saved {self.__class__.__name__}")
+        return True
 
     def insert_new(self, row: list):
         """Add a new object to the data"""
@@ -40,6 +41,7 @@ class abstract_data_class(metaclass=abc.ABCMeta):
         row.insert(0, i)
         self._data.loc[i] = row
         print(self._data.iloc[-1])
+        return self._data.iloc[-1]
 
     def find_single(self, key: int):
         """Return the object in data that matches the key"""
