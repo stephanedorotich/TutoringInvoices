@@ -228,7 +228,7 @@ Taking these two core methods of the program and splitting them into ones that a
 Additionally, the new naming convention creates more clarity as to what the methods do. `ui_X` indicates that there will be user interaction while `insert_X` indicates that there will be some sort of data addition (harkening to the INSERT SQL statement.)
 
 
-# Refactor 4 - MAJOR
+# Refactor 4 - Major
 
 ## Code Smell: Large Class
 
@@ -382,16 +382,36 @@ These changes have a huge positive impact on the ease of *future development*. F
 - write a method in `ui_operations` for the feature, and
 - leverage any of the UI utilities from `ui_service`
 
-# Refactor 5
+# Refactor 5 - Major
 
-Not actually written yet.
+## Code Smell: Alternative Classes with Different Interfaces
 
-## Code Smell: 
+After the previous refactorings, it became apparent that each of the classes: `sessionManager`, `studentManager`, `invoiceManager`, and `paymentManager` all had the same basic functionality. They all needed to be able to `load` from file, `save` to file, and `insert_new` elements.
 
-## Solution:
+This resulted in a lot of duplicated code (even though the load methods were each unique) that was tricky to modify if there was any change to the underlying structure of the data.
+
+Also, due to the complex load/save methods, there was lots of opportunity for mistakes to be made.
+
+## Solution: Extract Superclass
+
+The solution is the extract a superclass, called `abstract_data_class` which can be extended for `session`, `student`, `invoice`, and `payment`.
+
+In doing so, the functionality of those classes can be rigorously controlled to ensure they all meet the same specifications.
+
+As I extracted the superclass, I realized that the `load` and `save` methods were not going to generalize well. I made the rather involved decision to reconstruct the backend of my app by using the `pandas` library and using `DataFrames` to store and manipulate my program's data.
 
 ## Resulting Code
 
+Oh my goodness sooooo many changes AAAGGGHHHHHH!
+
 ## Testing
 
+Due to time constraints, rigorous testing was not an option. Additionally, previous test cases were no longer needed because the prolific changes resulted in most of my old code becoming obsolete.
+
+Instead, I once again took the approach of rigorously reviewing each of the 15 menu options to ensure that my program provides and ensuring that the program behaves as expected.
+
 ## Justification
+
+Making this change dramatically increases the integrity of my data. It hides the complexity of data storage and manipulation. It allows for future changes to be made such as developing a SQLite database to store the data, as that interfaces well with Pandas dataframes. The overhaul reduced the complexity of my save and load methods and opened up a powerful suite of data manipulation and analysis techniques to use, rather than dealing with my clunky lists.
+
+Additionally, by changing the underlying data structures of my program, I was able to remove the improper use of "lists with a list" that my program relied on, and have a much cleaner data structure that uses keys to indicate relationships between data.
