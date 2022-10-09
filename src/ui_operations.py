@@ -1,5 +1,6 @@
 import calendar
 import os
+from datetime import datetime
 import ui_service as use
 import helpers as h
 import studentManager as sm
@@ -40,12 +41,14 @@ class ui_operations():
                 print(f"There is no student matching: {name}")
                 continue
             if df.shape[0] == 1:
-                return df.iloc[0]
+                student = df.iloc[0]
             else:
                 options = df['name'].tolist()
                 choice = use.menuDisplay(f'Multiple students match the query <{name}>', options)
                 choice-=1 # subtract 1 for proper indexing
-                return df.iloc[choice]
+                student = df.iloc[choice]
+            print(f"Selected <{student.at['name']}>")
+            return student
 
     def view_all_students(self):
         print(self._sdc._data.to_string())
@@ -72,7 +75,7 @@ class ui_operations():
         row.append(use.get_integer_input("Please enter their rate: ")) # rate
         if row[-1] == 0:
             row[-1] = student.rate
-        row.append(0) # invoiceKey
+        row.append(-1) # invoiceKey
         self._xdc.insert_new(row)
 
     def view_all_sessions(self):
@@ -91,23 +94,60 @@ class ui_operations():
     # ==================================== #
     #||         Invoice Services
     def new_invoice_for_student(self):
-        student = pick_student()
+        student = self.pick_student()
+        sKey = student.at['studentKey']
         month = use.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)])
         year = use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)])
-        if im.insert_new_invoice(student, month, year) == -1:
-            print(f"\n{student.name} has no sessions for {year}-{month}")
+        startDate = str(datetime(year, month, 1))
+        if month == 12:
+            endDate = str(datetime(year+1, 1, 1))
+        else:
+            endDate = str(datetime(year, month+1, 1))
+
+        student_sessions = self._xdc.get_sessions_by_student_key(sKey)
+        df = self._xdc.get_sessions_by_month(startDate, endDate, student_sessions)
+        df = self._xdc.get_uninvoiced_sessions(df)
+
+        if df.empty:
+            print(f"{student.at['name']} has no sessions to invoice for the selected month.")
+            return False
+
+        invoiceKey = self._idc.make_invoice(sKey, startDate, endDate, df)
+        session_keys = df['sessionKey'].tolist()
+        self._xdc.update_sessions_with_invoice_key(session_keys, invoiceKey)
+        return True
 
     def view_all_invoices(self):
-        printItems(im.invoices)
+        print(self._idc._data.to_string())
 
     def view_invoices_by_student(self):
-        use.printItems(im.findInvoices(pick_student().invoices))
+        student = self.pick_student()
+        sKey = student.at['studentKey']
+        df = self._idc.get_invoices_by_student_key(sKey)
+        print(f"\n{student.at['name']}'s invoices")
+        print(df)
 
     def generate_monthly_invoices(self):
-        im.generateInvoicesByMonth(sm.students,
-            use.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]),
-            use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)]))
-        
+        month = use.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)])
+        year = use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)])
+        startDate = str(datetime(year, month, 1))
+        if month == 12:
+            endDate = str(datetime(year+1, 1, 1))
+        else:
+            endDate = str(datetime(year, month+1, 1))
+
+        df = self._xdc.get_sessions_by_month(startDate, endDate)
+        df = self._xdc.get_uninvoiced_sessions(df)
+
+        student_keys = df['studentKey'].unique().tolist()
+
+        for sKey in student_keys:
+            df = self._xdc.get_sessions_by_student_key(sKey)
+            invoiceKey = self._idc.make_invoice(sKey, startDate, endDate, df)
+            session_keys = df['sessionKey'].tolist()
+            self._xdc.update_sessions_with_invoice_key(session_keys, invoiceKey)
+
+
     def print_student_invoice(self):
         im.printInvoiceByStudent(pick_student(),
             use.getChoice("What month is the invoice for?", [n+1 for n in range(12)]),
@@ -187,7 +227,6 @@ class ui_operations():
 
     # ==================================== #
     #||         Data Services
-
     def load(self):
         if not os.path.isdir("data"):
             os.mkdir("data")
@@ -201,23 +240,14 @@ class ui_operations():
             open("data/invoices.csv", "w")
         if not os.path.isfile("data/payments.csv"):
             open("data/payments.csv", "w")
-        
-        # im.loadInvoices()
-        # xm.loadSessions()
-        # sm.loadStudents()
-        # pm.loadPayments()
         self._idc = invoice_data_class.invoice_data_class()
         self._pdc = payment_data_class.payment_data_class()
         self._sdc = student_data_class.student_data_class()
         self._xdc = session_data_class.session_data_class()
         
     def save(self):
-        self._idc.save_dataframe()
+        # self._idc.save_dataframe()
         self._pdc.save_dataframe()
         self._sdc.save_dataframe()
         self._xdc.save_dataframe()
-        # im.saveInvoices()
-        # sm.saveStudents()
-        # xm.saveSessions()
-        # pm.savePayments()
     # ==================================== #
