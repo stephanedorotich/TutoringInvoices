@@ -67,7 +67,7 @@ class ui_app():
 		if choice == 2:
 			self._uop.view_all_invoices()
 		if choice == 3:
-			self._uop.view_student_invoices()
+			self._uop.view_invoices_by_student()
 		if choice == 4:
 			self._uop.generate_monthly_invoices()
 		if choice == 5:
