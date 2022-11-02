@@ -2,13 +2,13 @@ from abstract_data_class import abstract_data_class
 import pandas as pd
 
 class student_data_class(abstract_data_class):
-    fname = "data/s1.csv"
+    fname = "data/students.csv"
     dtype = {
             "studentKey": 'int',
             "name": 'str',
             "pName": 'str',
             "pPhoneNum": 'str',
-            "pEmail": 'str',
+            "email": 'str',
             "pAddress": 'str',
             "rate": 'int'
             }

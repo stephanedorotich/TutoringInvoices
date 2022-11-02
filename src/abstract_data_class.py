@@ -27,11 +27,11 @@ class abstract_data_class(metaclass=abc.ABCMeta):
 
     def load_dataframe(self) -> pd.DataFrame:
         """Load in the data"""
-        return pd.read_csv(self.fname, header=None, names=self.dtype.keys(), dtype=self.dtype, parse_dates=self.parse_dates)
+        return pd.read_csv(self.fname, header=0, names=self.dtype.keys(), dtype=self.dtype, parse_dates=self.parse_dates)
 
     def save_dataframe(self) -> bool:
         """Save the data"""
-        self._data.to_csv(self.fname, header=None, index=None)
+        self._data.to_csv(self.fname, index=None)
         print(f"Saved {self.__class__.__name__}")
         return True
 

@@ -1,6 +1,7 @@
 # helpers.py
 from datetime import datetime
 from datetime import date
+from datetime import timedelta
 import dataclasses
 
 def importBooleanFromString(val):
@@ -127,3 +128,22 @@ def importListFromString(val):
 	except ValueError:
 		raise ValueError(f"'{val}' cannot be parsed as a list integers")
 
+def get_first_date_of_month(year, month):
+	return datetime(year, month, 1)
+
+# source: https://practicaldatascience.co.uk/data-science/how-to-calculate-month-end-and-week-end-dates-in-python
+def get_last_date_of_month(year, month):
+    """Return the last date of the month.
+    
+    Args:
+        year (int): Year, i.e. 2022
+        month (int): Month, i.e. 1 for January
+
+    Returns:
+        date (datetime): Last date of the current month
+    """
+    if month == 12:
+        last_date = datetime(year, month, 31)
+    else:
+        last_date = datetime(year, month + 1, 1) + timedelta(days=-1)
+    return last_date

@@ -1,10 +1,10 @@
 from abstract_data_class import abstract_data_class
-from datetime import datetime
+from datetime import datetime as dt
 import numpy as np
 import pandas as pd
 
 class invoice_data_class(abstract_data_class):
-    fname = "data/i1.csv"
+    fname = "data/invoices.csv"
     dtype = {
             "invoiceKey": 'int',
             "studentKey": 'int',
@@ -28,6 +28,8 @@ class invoice_data_class(abstract_data_class):
 
     def make_invoice(self, sKey: int, startDate: str, endDate: str, df: pd.DataFrame):
         cost = (df['duration'] * df['rate']).sum()
+        # print(df.to_string())
+        # print(cost)
         row = []
         row.append(sKey)
         row.append(startDate)
@@ -36,3 +38,12 @@ class invoice_data_class(abstract_data_class):
         row.append(0)
         invoice = self.insert_new(row)
         return invoice.at['invoiceKey']
+
+    def get_total_income(self):
+        return self._data['totalPaid'].sum()
+
+    def get_monthly_income(self, year: int, month: int):
+        df = self._data
+        df = df[df['startDate'].dt.year == year]
+        df = df[df['startDate'].dt.month == month]
+        return (df['total'].sum(), df['totalPaid'].sum())

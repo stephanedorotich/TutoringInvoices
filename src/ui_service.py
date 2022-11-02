@@ -16,10 +16,13 @@ def listener(userinput):
 def get_input(prompt : str) -> str:
     return listener(input(prompt))
 
-def get_integer_input(prompt : str) -> int:
+def get_integer_input(prompt : str, skip = False) -> int:
     while True:
         try:
-            return h.importIntegerFromString(get_input(prompt))
+            i = get_input(prompt)
+            if skip and i == "":
+                return 0
+            return h.importIntegerFromString(i)
         except ValueError as e:
             print(e)
             continue

@@ -1,6 +1,6 @@
 import calendar
 import os
-from datetime import datetime
+from datetime import datetime, date
 import ui_service as use
 import helpers as h
 import invoice_data_class
@@ -20,9 +20,9 @@ class ui_operations():
         row.append(use.get_input("Please enter their name: ")) # name
         row.append(use.get_input("Please enter their parent's name: ")) # pName
         row.append(use.get_input("Please enter their parent's phone number: ")) #pPhone
-        row.append(use.get_input("Please enter their parent's email: ")) #pEmail
+        row.append(use.get_input("Please enter their parent's email: ")) #email
         row.append(use.get_input("Please enter their address: ")) # pAddress
-        row.append(use.get_integer_input("Please entier their rate: ")) #rate
+        row.append(use.get_integer_input("Please enter their rate: ")) #rate
         self._sdc.insert_new(row)
         
     def pick_student(self):
@@ -67,7 +67,10 @@ class ui_operations():
         row.append(use.get_datetime_input("Please enter the datetime: ")) # datetime
         row.append(use.get_float_input("Please enter the duration: ")) # duration
         row.append(use.get_input("Please enter the subject: ").upper()) # subject
-        row.append(use.get_integer_input("Please enter their rate: ")) # rate
+        rate = use.get_integer_input("Please enter their rate: ", True)
+        if rate == 0:
+            rate = student.at['rate']
+        row.append(rate)
         if row[-1] == 0:
             row[-1] = student.rate
         row.append(-1) # invoiceKey
@@ -93,11 +96,8 @@ class ui_operations():
         sKey = student.at['studentKey']
         month = use.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)])
         year = use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)])
-        startDate = str(datetime(year, month, 1))
-        if month == 12:
-            endDate = str(datetime(year+1, 1, 1))
-        else:
-            endDate = str(datetime(year, month+1, 1))
+        startDate = h.get_first_date_of_month(year, month)
+        endDate = h.get_last_date_of_month(year, month)
 
         student_sessions = self._xdc.get_sessions_by_student_key(sKey)
         df = self._xdc.get_sessions_by_month(startDate, endDate, student_sessions)
@@ -129,21 +129,23 @@ class ui_operations():
     def generate_monthly_invoices(self):
         month = use.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)])
         year = use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)])
-        startDate = str(datetime(year, month, 1))
-        if month == 12:
-            endDate = str(datetime(year+1, 1, 1))
-        else:
-            endDate = str(datetime(year, month+1, 1))
+        startDate = h.get_first_date_of_month(year, month)
+        endDate = h.get_last_date_of_month(year, month)
+
+        print(f"\nStart:\t{startDate.strftime('%Y-%m-%d')}\nEnd:\t{endDate.strftime('%Y-%m-%d')}")
 
         df = self._xdc.get_sessions_by_month(startDate, endDate)
         df = self._xdc.get_uninvoiced_sessions(df)
 
+        if df.empty:
+            print("There are no sessions to invoice for the selected month.")
+            return
+
         student_keys = df['studentKey'].unique().tolist()
 
         for sKey in student_keys:
-            df = self._xdc.get_sessions_by_student_key(sKey)
-            invoiceKey = self._idc.make_invoice(sKey, startDate, endDate, df)
-            session_keys = df['sessionKey'].tolist()
+            invoiceKey = self._idc.make_invoice(sKey, startDate, endDate, df[df['studentKey'] == sKey])
+            session_keys = df.loc[df['studentKey'] == sKey]['sessionKey'].tolist()
             self._xdc.update_sessions_with_invoice_key(session_keys, invoiceKey)
 
 
@@ -155,6 +157,8 @@ class ui_operations():
 
     def print_monthly_invoices(self):
         raise NotImplementedError("Generating PDF invoices is not currently supported")
+
+
         # im.printInvoicesByMonth(
         #     use.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]),
         #     use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)]))
@@ -191,51 +195,29 @@ class ui_operations():
     # ==================================== #
     #||         Analysis Services
     def get_total_income(self):
-        raise NotImplementedError("Analysis not currently supported")
-        # totalCash = 0
-        # totalEtransfer = 0
-        # totalCheque = 0
-        # for payment in pm.payments:
-        #     if payment.paymentType == 'cash':
-        #         totalCash += payment.amount
-        #     elif payment.paymentType == 'e-transfer':
-        #         totalEtransfer += payment.amount
-        #     elif payment.paymentType == 'cheque':
-        #         totalCheque += payment.amount
-        # print(f'\nTotal cash: {totalCash}')
-        # print(f'Total e-transfer: {totalEtransfer}')
-        # print(f'Total cheque: {totalCheque}')
-        # print(f'\nGrand Total: {totalCash + totalEtransfer + totalCheque}')
+        print(f"Grand Total: {self._idc.get_total_income()}")
 
     def get_monthly_income(self):
-        raise NotImplementedError("Analysis not currently supported")
-            # monthlyIncomes = {}
-            # yearlyIncomes = {}
-            # for session in xm.sessions:
-            #     month = session.datetime.month
-            #     year = session.datetime.year
-            #     if not year in monthlyIncomes:
-            #         monthlyIncomes[year] = {}
-            #     if not month in monthlyIncomes[year]:
-            #         monthlyIncomes[year][month] = [0,0,0,0]
-            #     if not year in yearlyIncomes:
-            #         yearlyIncomes[year] = [0,0,0,0]
-            #     yearlyIncomes[year][0] += session.duration * session.rate
-            #     yearlyIncomes[year][2] += session.duration
-            #     yearlyIncomes[year][3] += 1
-            #     monthlyIncomes[year][month][0] += session.duration * session.rate
-            #     monthlyIncomes[year][month][2] += session.duration
-            #     monthlyIncomes[year][month][3] += 1
-            # for invoice in im.invoices:
-            #     month = invoice.billingPeriod[0].month
-            #     year = invoice.billingPeriod[0].year
-            #     yearlyIncomes[year][1] += invoice.totalPaid
-            #     monthlyIncomes[year][month][1] += invoice.totalPaid
-            # for year in [*monthlyIncomes]:
-            #     print(year)
-            #     for month in [*monthlyIncomes[year]]:
-            #         print(f'\t{calendar.month_abbr[month]}:\t{monthlyIncomes[year][month]}')
-            #     print(f'Total:\t\t{yearlyIncomes[year]}\n')
+        current_year = date.today().year
+        current_month = date.today().month
+        for y in range(2019, current_year+1):
+            print(f"\n{y}")
+            total = 0
+            totalPaid = 0
+            for m in range(1,13):
+                mi = self._idc.get_monthly_income(y, m)
+                if mi[0] == 0:
+                    continue
+                total+= mi[0]
+                totalPaid+= mi[1]
+                if (mi[0] != mi[1]):
+                    print(f"\t{calendar.month_abbr[m]:>3}:{mi[1]:>10}\t({mi[1]-mi[0]})")
+                else:
+                    print(f"\t{calendar.month_abbr[m]:>3}:{mi[1]:>10}")
+            print(f"\t==============\n\tTotal:{total:>8}")
+
+        total_uninvoiced = self._xdc.get_total_uninvoiced()
+        print(f"\nUninvoiced:\t{total_uninvoiced:>6}")
     # ==================================== #
 
 
@@ -261,7 +243,7 @@ class ui_operations():
         self._xdc = session_data_class.session_data_class()
         
     def save(self):
-        # self._idc.save_dataframe()
+        self._idc.save_dataframe()
         self._pdc.save_dataframe()
         self._sdc.save_dataframe()
         self._xdc.save_dataframe()
