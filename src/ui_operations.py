@@ -1,5 +1,7 @@
 import calendar
 import os
+import subprocess
+from time import sleep
 from datetime import datetime, date
 import ui_service as use
 import helpers as h
@@ -24,7 +26,7 @@ class ui_operations():
         row.append(use.get_input("Please enter their address: ")) # pAddress
         row.append(use.get_integer_input("Please enter their rate: ")) #rate
         self._sdc.insert_new(row)
-        
+
     def pick_student(self):
         """
         Prompts the user to select a student
@@ -123,7 +125,12 @@ class ui_operations():
             print(f"{student.at['name']} has no invoices")
             return False
         print(f"\n{student.at['name']}'s invoices")
-        print(df)
+
+        for invoiceKey, invoice in df.iterrows():
+            print(f"\nInvoice - {invoiceKey}")
+            sessions = self._xdc.get_sessions_by_invoice_key(invoiceKey)
+            print(sessions)
+            print(invoice)
         return True
 
     def generate_monthly_invoices(self):
@@ -156,12 +163,55 @@ class ui_operations():
         #     use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)]))
 
     def print_monthly_invoices(self):
-        raise NotImplementedError("Generating PDF invoices is not currently supported")
+        # raise NotImplementedError("Generating PDF invoices is not currently supported")
+        month = use.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)])
+        year = use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)])
+        startDate = h.get_first_date_of_month(year, month)
+
+        df = self._idc.get_invoices_by_month(startDate)
+
+        # for invoiceKey,invoice in df.iterrows():
+        #     print(f"hello: {invoiceKey}")
 
 
-        # im.printInvoicesByMonth(
-        #     use.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)]),
-        #     use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)]))
+        for invoiceKey,invoice in df.iterrows():
+            f = open("inv_data.md", "w")
+            invoiceDate = invoice['endDate'].strftime("%Y-%m-%d")
+
+            student = self._sdc.get_student_by_key(invoice['studentKey'])
+            sessions = self._xdc.get_sessions_by_invoice_key(invoiceKey)
+
+            parentName = student['pName'].values[0]
+            parentPhone = student['pPhoneNum'].values[0]
+            parentEmail = student['email'].values[0]
+            parentAddr = student['pAddress'].values[0]
+            studentName = student['name'].values[0]
+
+            f.write(f"\def\invoiceID{{{invoiceKey}}}\n")
+            f.write(f"\def\invoiceDate{{{invoiceDate}}}\n")
+            f.write(f"\def\parentName{{{parentName}}}\n")
+            f.write(f"\def\parentPhone{{{parentPhone}}}\n")
+            f.write(f"\def\parentEmail{{{parentEmail}}}\n")
+            f.write(f"\def\parentAddr{{{parentAddr}}}\n")
+            f.write(f"\def\studentName{{{studentName}}}\n")
+
+            balanceDue = 0
+            f.write("\def\sessions{")
+            for sessionKey, session in sessions.iterrows():
+                sessionDatetime = session['datetime'].strftime("%Y-%m-%d %H:%M")
+                sessionDuration = session['duration']
+                sessionRate = session['rate']
+                cost = sessionDuration * sessionRate
+                f.write(f" {sessionDatetime} & {sessionDuration:.2f} & \\${sessionRate}/hr & \\${cost:.2f} \\\\")
+                balanceDue += cost
+            f.write("}\n")
+            f.write(f"\def\\balanceDue{{{balanceDue:.2f}}}\n")
+            f.close()
+
+            filename = "pdfs/TutoringInvoice{:04d}-{}.pdf".format(invoiceKey, studentName.replace(" ", "_"))
+            command = "pandoc inv_data.md inv.md --pdf-engine=pdflatex -o {}".format(filename)
+            subprocess.run(command.split())
+            os.remove("inv_data.md")
 
     def pay_invoice(self):
         student = self.pick_student()

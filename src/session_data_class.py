@@ -19,6 +19,9 @@ class session_data_class(abstract_data_class):
     def get_sessions_by_student_key(self, sKey: np.int64):
         return self._data[self._data.studentKey == sKey]
 
+    def get_sessions_by_invoice_key(self, iKey: np.int64):
+        return self._data[self._data.invoiceKey == iKey]
+
     def get_sessions_by_month(self, startDate: datetime, endDate: datetime, df = pd.DataFrame()):
         if df.empty:
             df = self._data

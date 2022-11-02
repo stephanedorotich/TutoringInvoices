@@ -26,7 +26,7 @@ class invoice_data_class(abstract_data_class):
     def update_invoice_with_payment_amount(self, invoiceKey, amount):
         self._data.at[invoiceKey, 'totalPaid']+=amount
 
-    def make_invoice(self, sKey: int, startDate: str, endDate: str, df: pd.DataFrame):
+    def make_invoice(self, sKey: int, startDate: dt, endDate: dt, df: pd.DataFrame):
         cost = (df['duration'] * df['rate']).sum()
         # print(df.to_string())
         # print(cost)
@@ -38,6 +38,10 @@ class invoice_data_class(abstract_data_class):
         row.append(0)
         invoice = self.insert_new(row)
         return invoice.at['invoiceKey']
+
+    def get_invoices_by_month(self, startDate):
+        df = self._data
+        return df[df['startDate'] == startDate]
 
     def get_total_income(self):
         return self._data['totalPaid'].sum()

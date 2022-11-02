@@ -16,3 +16,6 @@ class student_data_class(abstract_data_class):
 
     def find_by_name(self, name: str):
         return self._data[self._data.name.str.contains(name, case=False)]
+
+    def get_student_by_key(self, key):
+        return self._data[self._data.studentKey == key]
