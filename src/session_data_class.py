@@ -25,7 +25,7 @@ class session_data_class(abstract_data_class):
     def get_sessions_by_month(self, startDate: datetime, endDate: datetime, df = pd.DataFrame()):
         if df.empty:
             df = self._data
-        return df[(df.datetime >= startDate) & (df.datetime <= endDate)]
+        return df[(df.datetime >= startDate) & (df.datetime < endDate)]
 
     def get_uninvoiced_sessions(self, df = pd.DataFrame()):
         if df.empty:

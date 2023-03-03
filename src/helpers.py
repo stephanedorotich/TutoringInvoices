@@ -1,7 +1,5 @@
 # helpers.py
-from datetime import datetime
-from datetime import date
-from datetime import timedelta
+from datetime import datetime, date
 import dataclasses
 
 def importBooleanFromString(val):
@@ -132,7 +130,7 @@ def get_first_date_of_month(year, month):
 	return datetime(year, month, 1)
 
 # source: https://practicaldatascience.co.uk/data-science/how-to-calculate-month-end-and-week-end-dates-in-python
-def get_last_date_of_month(year, month):
+def get_first_date_of_next_month(year, month):
     """Return the last date of the month.
     
     Args:
@@ -143,7 +141,6 @@ def get_last_date_of_month(year, month):
         date (datetime): Last date of the current month
     """
     if month == 12:
-        last_date = datetime(year, month, 31)
+        return datetime(year+1, 1, 1)
     else:
-        last_date = datetime(year, month + 1, 1) + timedelta(days=-1)
-    return last_date
+    	return datetime(year, month + 1, 1)

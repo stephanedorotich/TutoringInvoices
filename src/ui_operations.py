@@ -2,7 +2,7 @@ import calendar
 import os
 import subprocess
 from time import sleep
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import ui_service as use
 import helpers as h
 import invoice_data_class
@@ -137,7 +137,7 @@ class ui_operations():
         month = use.getChoice("What month would you like to invoice for?", [n+1 for n in range(12)])
         year = use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)])
         startDate = h.get_first_date_of_month(year, month)
-        endDate = h.get_last_date_of_month(year, month)
+        endDate = h.get_first_date_of_next_month(year, month)
 
         print(f"\nStart:\t{startDate.strftime('%Y-%m-%d')}\nEnd:\t{endDate.strftime('%Y-%m-%d')}")
 
@@ -151,7 +151,7 @@ class ui_operations():
         student_keys = df['studentKey'].unique().tolist()
 
         for sKey in student_keys:
-            invoiceKey = self._idc.make_invoice(sKey, startDate, endDate, df[df['studentKey'] == sKey])
+            invoiceKey = self._idc.make_invoice(sKey, startDate, endDate - timedelta(days=1), df[df['studentKey'] == sKey])
             session_keys = df.loc[df['studentKey'] == sKey]['sessionKey'].tolist()
             self._xdc.update_sessions_with_invoice_key(session_keys, invoiceKey)
 
