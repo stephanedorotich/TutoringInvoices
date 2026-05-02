@@ -1,3 +1,5 @@
-__pycache__
-*.pdf
-*.csv
+data/
+pdfs/
+src/__pycache__/
+.tapp/
+pyvenv.cfg

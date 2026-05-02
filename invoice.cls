@@ -26,6 +26,7 @@
 
 \LoadClass[12pt]{article}
 
+\usepackage[T1]{fontenc}
 \usepackage[letterpaper,hmargin=0.79in,vmargin=0.79in]{geometry}
 \usepackage[parfill]{parskip} % Do not indent paragraphs
 \usepackage{fp} % Fixed-point arithmetic

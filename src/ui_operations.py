@@ -5,6 +5,7 @@ from time import sleep
 from datetime import datetime, date, timedelta
 import ui_service as use
 import helpers as h
+import pandas as pd
 import invoice_data_class
 import payment_data_class
 import session_data_class
@@ -42,7 +43,7 @@ class ui_operations():
             else:
                 options = df['name'].tolist()
                 choice = use.menuDisplay(f'Multiple students match the query <{name}>', options)
-                choice-=1 # subtract 1 for proper indexing
+                choice -=1 # subtract 1 for proper indexing
                 student = df.iloc[choice]
             print(f"Selected <{student.at['name']}>")
             return student
@@ -157,10 +158,65 @@ class ui_operations():
 
 
     def print_student_invoice(self):
-        raise NotImplementedError("Generating PDF invoices is not currently supported")
-        # im.printInvoiceByStudent(pick_student(),
-        #     use.getChoice("What month is the invoice for?", [n+1 for n in range(12)]),
-        #     use.getChoice("What year would you like to invoice for?", [n+1 for n in range(2018,2099)]))
+        # Get student key
+        student = self.pick_student()
+        sKey = student.at['studentKey']
+
+        # Get invoice key to print
+        df = self._idc.get_invoices_by_student_key(sKey)
+        if df.empty:
+            print(f"{student.at['name']} has no invoices")
+            return
+
+        iKeys = df['invoiceKey'].tolist()
+        choice = use.menuDisplay(f'Please select the', iKeys)
+        choice -= 1  # subtract 1 for proper indexing
+        invoice = df.iloc[choice]
+        invoiceKey = invoice['invoiceKey']
+
+        # Print Invoice
+        f = open("inv_data.md", "w")
+        invoiceDate = invoice['endDate'].strftime("%Y-%m-%d")
+
+        student = self._sdc.get_student_by_key(invoice['studentKey'])
+        sessions = self._xdc.get_sessions_by_invoice_key(invoiceKey)
+
+        parentName = student['pName'].values[0]
+        parentPhone = student['pPhoneNum'].values[0]
+        parentEmail = student['email'].values[0]
+        parentAddr = student['pAddress'].values[0]
+        studentName = student['name'].values[0]
+
+        f.write(f"\\def\\invoiceID{{{invoiceKey}}}\n")
+        f.write(f"\\def\\invoiceDate{{{invoiceDate}}}\n")
+        f.write(f"\\def\\parentName{{{parentName}}}\n")
+        f.write(f"\\def\\parentPhone{{{parentPhone}}}\n")
+        f.write(f"\\def\\parentEmail{{{parentEmail}}}\n")
+        f.write(f"\\def\\parentAddr{{{parentAddr}}}\n")
+        f.write(f"\\def\\studentName{{{studentName}}}\n")
+
+        balanceDue = 0
+        f.write("\\def\\sessions{")
+        for sessionKey, session in sessions.iterrows():
+            sessionDatetime = session['datetime'].strftime(
+                "%Y-%m-%d %H:%M")
+            sessionDuration = session['duration']
+            sessionRate = session['rate']
+            cost = sessionDuration * sessionRate
+            f.write(f" {sessionDatetime} & {sessionDuration:.2f} & \\${
+                    sessionRate}/hr & \\${cost:.2f} \\\\")
+            balanceDue += cost
+        f.write("}\n")
+        f.write(f"\\def\\balanceDue{{{balanceDue:.2f}}}\n")
+        f.close()
+
+        filename = "pdfs/TutoringInvoice{:04d}-{}.pdf".format(
+            invoiceKey, studentName.replace(" ", "_"))
+        command = "pandoc inv_data.md inv.md --pdf-engine=pdflatex -o {}".format(
+            filename)
+        subprocess.run(command.split())
+        os.remove("inv_data.md")
+        return
 
     def print_monthly_invoices(self):
         # raise NotImplementedError("Generating PDF invoices is not currently supported")
@@ -170,11 +226,7 @@ class ui_operations():
 
         df = self._idc.get_invoices_by_month(startDate)
 
-        # for invoiceKey,invoice in df.iterrows():
-        #     print(f"hello: {invoiceKey}")
-
-
-        for invoiceKey,invoice in df.iterrows():
+        for invoiceKey, invoice in df.iterrows():
             f = open("inv_data.md", "w")
             invoiceDate = invoice['endDate'].strftime("%Y-%m-%d")
 
@@ -187,16 +239,16 @@ class ui_operations():
             parentAddr = student['pAddress'].values[0]
             studentName = student['name'].values[0]
 
-            f.write(f"\def\invoiceID{{{invoiceKey}}}\n")
-            f.write(f"\def\invoiceDate{{{invoiceDate}}}\n")
-            f.write(f"\def\parentName{{{parentName}}}\n")
-            f.write(f"\def\parentPhone{{{parentPhone}}}\n")
-            f.write(f"\def\parentEmail{{{parentEmail}}}\n")
-            f.write(f"\def\parentAddr{{{parentAddr}}}\n")
-            f.write(f"\def\studentName{{{studentName}}}\n")
+            f.write(f"\\def\\invoiceID{{{invoiceKey}}}\n")
+            f.write(f"\\def\\invoiceDate{{{invoiceDate}}}\n")
+            f.write(f"\\def\\parentName{{{parentName}}}\n")
+            f.write(f"\\def\\parentPhone{{{parentPhone}}}\n")
+            f.write(f"\\def\\parentEmail{{{parentEmail}}}\n")
+            f.write(f"\\def\\parentAddr{{{parentAddr}}}\n")
+            f.write(f"\\def\\studentName{{{studentName}}}\n")
 
             balanceDue = 0
-            f.write("\def\sessions{")
+            f.write("\\def\\sessions{")
             for sessionKey, session in sessions.iterrows():
                 sessionDatetime = session['datetime'].strftime("%Y-%m-%d %H:%M")
                 sessionDuration = session['duration']
@@ -205,7 +257,7 @@ class ui_operations():
                 f.write(f" {sessionDatetime} & {sessionDuration:.2f} & \\${sessionRate}/hr & \\${cost:.2f} \\\\")
                 balanceDue += cost
             f.write("}\n")
-            f.write(f"\def\\balanceDue{{{balanceDue:.2f}}}\n")
+            f.write(f"\\def\\balanceDue{{{balanceDue:.2f}}}\n")
             f.close()
 
             filename = "pdfs/TutoringInvoice{:04d}-{}.pdf".format(invoiceKey, studentName.replace(" ", "_"))
@@ -224,20 +276,20 @@ class ui_operations():
 
         iKeys = df['invoiceKey'].tolist()
         choice = use.menuDisplay(f'Please select the', iKeys)
-        choice-=1 # subtract 1 for proper indexing
+        choice -=1 # subtract 1 for proper indexing
         invoice = df.iloc[choice]
         print(invoice)
         print(invoice['invoiceKey'])
 
         row = []
         row.append(use.getChoice(f'Please enter the payment type: ',['cash','e-transfer','cheque']))
-        row.append(use.get_date_input("Please enter the payment date: "))
+        row.append(use.get_datetime_input("Please enter the payment date: "))
         row.append(use.get_float_input("Please enter the payment amount: "))
         row.append(sKey)
         row.append(invoice['invoiceKey'])
 
         payment = self._pdc.insert_new(row)
-        self._idc.update_invoice_with_payment_amount(invoice['invoiceKey'],payment['amount'])
+        self._idc.update_invoice_with_payment_amount(invoice['invoiceKey'], payment['amount'])
     # ==================================== #
 
 
@@ -254,20 +306,77 @@ class ui_operations():
             print(f"\n{y}")
             total = 0
             totalPaid = 0
-            for m in range(1,13):
+            for m in range(1, 13):
                 mi = self._idc.get_monthly_income(y, m)
                 if mi[0] == 0:
                     continue
-                total+= mi[0]
-                totalPaid+= mi[1]
+                total += mi[0]
+                totalPaid += mi[1]
                 if (mi[0] != mi[1]):
-                    print(f"\t{calendar.month_abbr[m]:>3}:{mi[1]:>10}\t({mi[1]-mi[0]})")
+                    print(f"\t{calendar.month_abbr[m]:>3}:{mi[1]:>11.2f}\t({mi[1]-mi[0]:.2f})")
                 else:
-                    print(f"\t{calendar.month_abbr[m]:>3}:{mi[1]:>10}")
-            print(f"\t==============\n\tTotal:{total:>8}")
+                    print(f"\t{calendar.month_abbr[m]:>3}:{mi[1]:>11.2f}")
+            print(f"\t==============\n\tTotal:{total:>9.2f}")
 
         total_uninvoiced = self._xdc.get_total_uninvoiced()
-        print(f"\nUninvoiced:\t{total_uninvoiced:>6}")
+        print(f"\nUninvoiced:\t{total_uninvoiced:>7.2f}")
+
+    def get_annual_hours_tutored(self):
+        earliest_datetime = self._xdc.get_earliest_datetime()
+        first_year = earliest_datetime.year
+        first_month = earliest_datetime.month
+        current_date = date.today()
+        current_year = current_date.year
+        current_month = current_date.month
+        total = 0
+
+        start_year = first_year if first_month >= 9 else first_year-1
+        print(f"\n{
+              calendar.month_abbr[9]}-{first_year} to {calendar.month_abbr[8]}-{first_year1}")
+
+        for y in range(first_year, current_year1):
+            start_month = first_month if y == first_year else 1
+            for m in range(start_month, 13):
+                if m == 9:
+                    print(f"\t==============\n\tTotal:{total:>8}")
+                    if not y == current_year:
+                        print(
+                            f"\n{calendar.month_abbr[9]}-{y} to {calendar.month_abbr[8]}-{y1}")
+                    total = 0
+
+                hours_tutored = self._xdc.get_monthly_hours_tutored(y, m)
+                total = hours_tutored
+                if hours_tutored == 0:
+                    continue
+                print(f"\t{calendar.month_abbr[m]:>3}:{hours_tutored:>7.0f}")
+
+    def print_parent_email_list(self):
+        emails = self._sdc.get_parent_emails().tolist()
+        # Join the emails with a semicolon and a space between them
+        formatted_emails = '; '.join(emails)
+        print(formatted_emails)
+    # ==================================== #
+
+
+
+    # ==================================== #
+    #||         Debugging Helpers
+    def add_hours_to_datetime_column(self, df: pd.DataFrame, column_name, hours_to_add=7):
+        """
+        Add a specified number of hours to a datetime column in place.
+
+        Parameters:
+        -----------
+        df : pd.DataFrame
+            The DataFrame containing the column to modify.
+        column_name : str
+            The name of the column (string) that holds datetime values.
+        hours_to_add : int, optional
+            The number of hours to add to each datetime, default is 7.
+        """
+        # Convert `hours_to_add` into a Timedelta object
+        df[column_name] = df[column_name] + pd.Timedelta(hours=hours_to_add)
+
     # ==================================== #
 
 

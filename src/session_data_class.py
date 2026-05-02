@@ -27,6 +27,10 @@ class session_data_class(abstract_data_class):
             df = self._data
         return df[(df.datetime >= startDate) & (df.datetime < endDate)]
 
+    def get_monthly_hours_tutoring(self, year: int, month: int) -> float:
+        df = self._data
+        return df[(df['datetime'].dt.year == year) & (df['datetime'].dt.month == month)]['duration'].sum()
+
     def get_uninvoiced_sessions(self, df = pd.DataFrame()):
         if df.empty:
             df = self._data
@@ -41,4 +45,6 @@ class session_data_class(abstract_data_class):
         df = df[df['invoiceKey'] == -1]
         return (df['duration'] * df['rate']).sum()
 
-# xdc = session_data_class()
+    def get_earliest_datetime(self):
+        df = self._data
+        return df['datetime'].min()

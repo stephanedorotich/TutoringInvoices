@@ -12,7 +12,7 @@ class abstract_data_class(metaclass=abc.ABCMeta):
         if cls is abstract_data_class:
             raise TypeError(f"Only children of '{cls.__name__}' may be instantiated")
         return super().__new__(cls)
-    
+
     def __init__(self):
         self._data = self.load_dataframe()
 
@@ -27,11 +27,19 @@ class abstract_data_class(metaclass=abc.ABCMeta):
 
     def load_dataframe(self) -> pd.DataFrame:
         """Load in the data"""
-        return pd.read_csv(self.fname, header=0, names=self.dtype.keys(), dtype=self.dtype, parse_dates=self.parse_dates)
+        df = pd.read_csv(
+            self.fname,
+            header=0,
+            names=self.dtype.keys(),
+            dtype=self.dtype)
+        if self.parse_dates:
+            for col in self.parse_dates:
+                df[col] = pd.to_datetime(df[col], format="%Y-%m-%d %H:%M:%S")
+        return df
 
     def save_dataframe(self) -> bool:
         """Save the data"""
-        self._data.to_csv(self.fname, index=None)
+        self._data.to_csv(self.fname, index=None, date_format="%Y-%m-%d %H:%M:%S")
         print(f"Saved {self.__class__.__name__}")
         return True
 

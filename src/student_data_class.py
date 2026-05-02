@@ -19,3 +19,6 @@ class student_data_class(abstract_data_class):
 
     def get_student_by_key(self, key):
         return self._data[self._data.studentKey == key]
+
+    def get_parent_emails(self):
+        return self._data['email']

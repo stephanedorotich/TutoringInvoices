@@ -81,12 +81,18 @@ class ui_app():
 		name = "ANALYSIS MENU"
 		options = [
 			'Total Income',
-			'Monthly Incomes']
+			'Monthly Incomes',
+			'Hours Tutored',
+			'Email List']
 		choice = use.menuDisplay(name, options)
 		if choice == 1:
 			self._uop.get_total_income()
 		if choice == 2:
 			self._uop.get_monthly_income()
+		if choice == 3:
+			self._uop.get_annual_hours_tutored()
+		if choice == 4:
+			self._uop.print_parent_email_list()
 
 	def quit(self):
 		self._uop.save()
